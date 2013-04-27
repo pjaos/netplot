@@ -38,6 +38,12 @@ How do I run it
   executed on a different computer if the --host command line argument is used) to
   display the demo plots.
   
+- To run the python netplot client demo code start the netplot_gui as detailed above then 
+  run 'python netplot_client_demo.py' from the python_client folder.
+  
+- To run the C python netplot client demo code, build the code as detailed previously 
+  the run the netplot_client program from the c_client/bin/Debug folder.
+  
 The netplot client in the above example is Java based. A python and C implementation of the 
 netplot clients (and demo program code) are included for adding netplot capabilities into
 software that use these languages.
