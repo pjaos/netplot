@@ -55,3 +55,6 @@ programs in order to add netplot support to them.
 Licensing
 netplot is distributed under the terms of the GNU Lesser General Public License
 
+Credits
+Many thanks to the authors and contributors to the excellent jfreechart project.
+
