@@ -18,7 +18,7 @@ file. This requires that Java (SDK) and ant is installed.
 
 Python netplot client.
 The python_client folder contains the python client. This file may be executed directly
-('python netplot.py' command) to display the demo graphs. This requires that Python is
+('python netplot_client_demo.py' command) to display the demo graphs. This requires that Python is
 installed.
 
 C client code
