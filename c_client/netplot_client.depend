@@ -1,0 +1,120 @@
+# depslib dependency file v1.0
+1331276074 source:/home/pja/codeblocks/netplot_client/main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<sys/socket.h>
+	<syslog.h>
+	<arpa/inet.h>
+	<string.h>
+	<unistd.h>
+	<netinet/in.h>
+	<netinet/tcp.h>
+	"netplot_client.h"
+
+1331361335 /home/pja/codeblocks/netplot_client/netplot_client.h
+
+1331362056 source:/home/pja/codeblocks/netplot_client/netplot_demo.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	"netplot_client.h"
+
+1331297322 source:/media/7841-2CE2/codeblocks/netplot_client/main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<sys/socket.h>
+	<syslog.h>
+	<arpa/inet.h>
+	<string.h>
+	<unistd.h>
+	<netinet/in.h>
+	<netinet/tcp.h>
+	"netplot_client.h"
+
+1331300364 /media/7841-2CE2/codeblocks/netplot_client/netplot_client.h
+
+1331302476 source:/media/7841-2CE2/codeblocks/netplot_client/netplot_demo.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	"netplot_client.h"
+
+1331297594 source:/media/7841-2CE2/codeblocks/netplot_client/linked_list.c
+	<stdio.h>
+	<stdlib.h>
+
+1331302424 source:/media/7841-2CE2/codeblocks/netplot_client/netplot_client.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<sys/socket.h>
+	<syslog.h>
+	<arpa/inet.h>
+	<string.h>
+	<unistd.h>
+	<netinet/in.h>
+	<netinet/tcp.h>
+	"netplot_client.h"
+
+1331359603 source:/home/pja/codeblocks/netplot_client/netplot_client.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<sys/socket.h>
+	<syslog.h>
+	<arpa/inet.h>
+	<string.h>
+	<unistd.h>
+	<netinet/in.h>
+	<netinet/tcp.h>
+	"netplot_client.h"
+
+1331359603 source:/shared/home/pja/projects/eclipse_workspace/netplot/c_client/netplot_client/netplot_client.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<sys/socket.h>
+	<syslog.h>
+	<arpa/inet.h>
+	<string.h>
+	<unistd.h>
+	<netinet/in.h>
+	<netinet/tcp.h>
+	"netplot_client.h"
+
+1331361335 /shared/home/pja/projects/eclipse_workspace/netplot/c_client/netplot_client/netplot_client.h
+
+1331362357 source:/shared/home/pja/projects/eclipse_workspace/netplot/c_client/netplot_client/netplot_demo.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	"netplot_client.h"
+
+1366361354 source:/home/pja/tmp/netplot/c_client/netplot_client.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<sys/socket.h>
+	<syslog.h>
+	<arpa/inet.h>
+	<string.h>
+	<unistd.h>
+	<netinet/in.h>
+	<netinet/tcp.h>
+	"netplot_client.h"
+
+1366361354 /home/pja/tmp/netplot/c_client/netplot_client.h
+
+1366869564 source:/home/pja/tmp/netplot/c_client/netplot_demo.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<math.h>
+	"netplot_client.h"
+
