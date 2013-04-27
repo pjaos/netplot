@@ -6,14 +6,21 @@
               as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="netplot">
     <property environment="env"/>
-    <property name="jfreechart.location" value="../jfreechart"/>
-    <property name="ECLIPSE_HOME" value="../../../../../../../../../../usr/lib/eclipse"/>
+    <property name="ECLIPSE_HOME" value="../../../../../usr/lib/eclipse"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
     <path id="netplot.classpath">
         <pathelement location="bin"/>
-        <pathelement location="${jfreechart.location}/bin"/>
+        <pathelement location="jars/swtgraphics2d.jar"/>
+        <pathelement location="jars/servlet.jar"/>
+        <pathelement location="jars/junit.jar"/>
+        <pathelement location="jars/jfreechart-1.0.14-swt.jar"/>
+        <pathelement location="jars/jfreechart-1.0.14-experimental.jar"/>
+        <pathelement location="jars/jfreechart-1.0.14.jar"/>
+        <pathelement location="jars/jcommon-1.0.17.jar"/>
+        <pathelement location="jars/iText-2.1.5.jar"/>
+        <pathelement location="jars/gnujaxp.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -61,15 +68,17 @@
             <classpath refid="netplot.classpath"/>
         </java>
     </target>
-	<jar destfile="netplot_gui.jar" basedir = "bin">
-	  <zipgroupfileset dir="jars" includes="*.jar" /> 
-	  <manifest>
-	    <attribute name="Main-Class" value="netplot.NetPlotter" />
-	  </manifest>
-	</jar>
-  <jar destfile="netplot_client_demo.jar" basedir = "bin">
-    <manifest>
-      <attribute name="Main-Class" value="netplot.client.NetplotClient" />
-    </manifest>
-  </jar>
+  <target name="jar" description="JARs the Task" depends="build">
+    <jar destfile="netplot_gui.jar" basedir = "bin">
+      <zipgroupfileset dir="jars" includes="*.jar" /> 
+      <manifest>
+        <attribute name="Main-Class" value="netplot.NetPlotter" />
+      </manifest>
+    </jar>
+    <jar destfile="netplot_client_demo.jar" basedir = "bin">
+      <manifest>
+        <attribute name="Main-Class" value="netplot.client.NetplotClient" />
+      </manifest>
+    </jar>
+  </target>
 </project>
