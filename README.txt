@@ -22,7 +22,7 @@ The python_client folder contains the python client. This file may be executed d
 installed.
 
 C client code
-This resides in the c_code folder. From this folder run the 'codeblocks netplot_client.cbp'
+This resides in the c_client folder. From this folder run the 'codeblocks netplot_client.cbp'
 and select the Build option from the Build menu. This requires that codeblocks is installed.
 
 
