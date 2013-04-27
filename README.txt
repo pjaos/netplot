@@ -26,7 +26,7 @@ software that use these languages.
 How do I build it
 
 Java netplot gui and client code
-Run the command 'ant -v clean build jar' command (in the same path as the build.xml file, to 
+Run the command 'ant clean build jar' command (in the same path as the build.xml file, to 
 compile the Java code and build the output jar files. Once the build is complete the 
 netplot_gui.jar and netplot_client_demo.jar files should appear alongside the build.xml
 file. Java (SDK) and ant must be installed on the host computer.
