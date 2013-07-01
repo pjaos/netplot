@@ -9,6 +9,7 @@
 # This file contains example code of how netplot may be used
     
 import time
+from datetime import datetime, timedelta
 import random
 from math import sin, cos, tan
 from netplot_client import PlotConfig, NetPlot, NetPlotError
@@ -87,6 +88,34 @@ def timeExample3(netPlot):
     netPlot.addPlotValues([random.randint(1000,10000),random.randint(10,100)])
     i=i+1
 
+def timeExample4(netPlot):
+  """Time series chart passing the time and the y value"""
+  plotConfig = PlotConfig()
+  plotConfig.plotName="Plot 0"
+  plotConfig.xAxisName="The X axis"
+  plotConfig.yAxisName="Y axis (Plot0)"
+  plotConfig.enableLines=1
+  plotConfig.enableShapes=1
+  plotConfig.enableAutoScale=1
+  plotConfig.maxAgeSeconds=5
+  netPlot.setPlotType('time', title="TIME chart, passing the time and the y value.")
+  netPlot.addPlot(plotConfig)  
+  plotConfig.plotName="Plot 1"
+  #Add a new Y Axis
+  plotConfig.yAxisName="Y Axis (Plot1)"
+  netPlot.addPlot(plotConfig)  
+
+  i=0
+  t1 = datetime.now()
+  t2 = datetime.now()
+  t2=t2+timedelta(seconds=10000)
+  while i<10:
+    netPlot.addPlotValues([[t1,random.randint(1000,10000)],[t2,random.randint(1000,10000)]])
+    #Inc time by a year
+    t1=t1+timedelta(seconds=60*60*24*365)
+    t2=t2+timedelta(seconds=60*60*24*365)
+    i=i+1
+    
 def barExample(netPlot):
   """Bar chart example"""
   plotConfig0 = PlotConfig()
@@ -295,7 +324,7 @@ def showAllExamples(address, initWindow, debug=0, port=9600):
   
   if initWindow:
     #Set these non plot or chart specific parameters on first connection
-    netPlot0.setGrid(3,3)
+    netPlot0.setGrid(4,4)
     netPlot0.setWindowTitle("Python netplot client demo")
   
   timeExample1(netPlot0)
@@ -304,33 +333,37 @@ def showAllExamples(address, initWindow, debug=0, port=9600):
   netPlot1.connect(address, port+1)
   timeExample2(netPlot1)
 
-  netPlot1 = NetPlot(debug=debug)          
-  netPlot1.connect(address, port+2)
-  timeExample3(netPlot1)
-
   netPlot2 = NetPlot(debug=debug)          
-  netPlot2.connect(address, port+3)
-  barExample(netPlot2)
+  netPlot2.connect(address, port+2)
+  timeExample3(netPlot2)
 
   netPlot3 = NetPlot(debug=debug)          
-  netPlot3.connect(address, port+4)
-  xyExample1(netPlot3)
+  netPlot3.connect(address, port+3)
+  timeExample4(netPlot3)
 
   netPlot4 = NetPlot(debug=debug)          
-  netPlot4.connect(address, port+5)
-  xyExample2(netPlot4)
+  netPlot4.connect(address, port+4)
+  barExample(netPlot4)
 
   netPlot5 = NetPlot(debug=debug)          
-  netPlot5.connect(address, port+6)
-  xyExample3(netPlot5)
+  netPlot5.connect(address, port+5)
+  xyExample1(netPlot5)
 
   netPlot6 = NetPlot(debug=debug)          
-  netPlot6.connect(address, port+7)
-  showDialExample(netPlot6)
+  netPlot6.connect(address, port+6)
+  xyExample2(netPlot6)
 
   netPlot7 = NetPlot(debug=debug)          
-  netPlot7.connect(address, port+8)
-  cachedPlot(netPlot7)
+  netPlot7.connect(address, port+7)
+  xyExample3(netPlot7)
+
+  netPlot8 = NetPlot(debug=debug)          
+  netPlot8.connect(address, port+8)
+  showDialExample(netPlot8)
+
+  netPlot9 = NetPlot(debug=debug)          
+  netPlot9.connect(address, port+9)
+  cachedPlot(netPlot9)
 
   netPlot0.disconnect()
   netPlot1.disconnect()
@@ -340,6 +373,8 @@ def showAllExamples(address, initWindow, debug=0, port=9600):
   netPlot5.disconnect()
   netPlot6.disconnect()
   netPlot7.disconnect()
+  netPlot8.disconnect()
+  netPlot9.disconnect()
     
 def usage():
   """show program usage options"""
@@ -395,7 +430,7 @@ if __name__== '__main__':
       sys.exit(-1)
       
   if showExamples:
-    showAllExamples(address, 1)
+    showAllExamples(address, True)
   
     
   	

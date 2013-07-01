@@ -9,7 +9,7 @@
 
 #define MAX_STR_LEN         256
 #define DEFAULT_BASE_PORT   9600
-#define DEFAULT_PLOT_COUNT  10
+#define DEFAULT_PLOT_COUNT  100
 #define RX_BUFFSIZE         65536
 #define CMD_BUFFER_SIZE     256
 
@@ -51,6 +51,18 @@ struct _plot_config
     float           maxScaleValue;
 };
 
+struct _time_series_point
+{
+    float           value; //The Y axis value to be plotted
+    int             year;
+    int             month;
+    int             day;
+    int             hour;
+    int             minute;
+    int             second;
+    int             mill_second;
+};
+
 void info(const char *fmt, ...);
 void error(const char *fmt, ...);
 void fatal(const char *fmt, ...) ;
@@ -76,5 +88,7 @@ int netplot_clear(int server_connection_index);
 int netplot_replot(int server_connection_index, int plot_index);
 void netplot_enable_cache(int enabled);
 int netplot_update();
+int netplot_add_time_series_plot_value(int server_connection_index, int plot_index, struct _time_series_point *tsp);
+float netplot_get_server_version();
 
 #endif /* NETPLOT_CLIENT_H_INCLUDED */

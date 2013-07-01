@@ -445,6 +445,14 @@ void netplot_show_vars()
 }
 
 /**
+ * Get the version of the netplot server. Should be called only once connected to the server.
+ * @return The server version
+ **/
+float netplot_get_server_version() {
+    return netplot_config.serverVersion;
+}
+
+/**
  * Init variables internal to the netplot client to their default values
  **/
 void netplot_defaults()
@@ -830,6 +838,31 @@ int netplot_add_plot_values(int server_connection_index,  float *values, int val
         rc =  send_command_expect_ok(server_connection_index, buffer);
     }
     return rc;
+}
+
+/**
+ * Add a time series value to a plot. This must be used for time series plots
+ * where the timestamp is passed from the netplot client code. For time series
+ * plots where the time is allocated at the time the server receives a value,
+ * netplot_add_plot_values should be used.
+ * The fast plot option where all plot points are cached locally and sent to the
+ * server is not supported for these time series plots.
+ *
+ * @param server_connection_index The zero based indexed for the plot to send this value to.
+ * @param tsp                     The structure that holds the value to be plotted along with
+ *                                it time.
+ * Returns 0 : ok
+ *       -ve : Failed
+ **/
+int netplot_add_time_series_plot_value(int server_connection_index, int plot_index, struct _time_series_point *tsp )
+{
+    char    buffer[CMD_BUFFER_SIZE];
+
+    memset(buffer, 0 , CMD_BUFFER_SIZE);
+
+    //Add the plot index
+    snprintf(buffer, CMD_BUFFER_SIZE, "%d:%d;%d;%d;%d;%d;%d;%d:%f\n",plot_index, tsp->year, tsp->month, tsp->day, tsp->hour, tsp->minute, tsp->second, tsp->mill_second, tsp->value);
+    return  send_command_expect_ok(server_connection_index, buffer);
 }
 
 /**

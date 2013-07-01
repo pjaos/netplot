@@ -191,7 +191,7 @@ public class NetPlotter
   {
     boolean guiInputMode=false;
     basePort=9600;
-    maxPlotCount=10;
+    maxPlotCount=100;
     boolean readBasePort=false;
     boolean readMaxPlotCount=false;
     

@@ -13,6 +13,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.time.Millisecond;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -93,6 +94,11 @@ public class XYPlotPanel extends GenericPlotPanel implements PlotPanelInterface
     throw new NetPlotException("addPlotValue(double xValue, double yValue) is invalid for XYPlotPanel"); 
   }
   
+  public void addPlotValue(int plotIndex, Millisecond ms, double yValue) throws NetPlotException 
+  { 
+    throw new NetPlotException("addPlotValue(int plotIndex, Millisecond ms, double yValue) should not be used on XYPlotPanel"); 
+  }
+
   public void removePlots()
   {
     init();

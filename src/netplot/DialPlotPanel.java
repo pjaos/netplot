@@ -26,6 +26,7 @@ import org.jfree.chart.plot.dial.DialValueIndicator;
 import org.jfree.chart.plot.dial.StandardDialFrame;
 import org.jfree.chart.plot.dial.StandardDialScale;
 import org.jfree.data.general.DefaultValueDataset;
+import org.jfree.data.time.Millisecond;
 import org.jfree.ui.GradientPaintTransformType;
 import org.jfree.ui.StandardGradientPaintTransformer;
 
@@ -174,6 +175,11 @@ public class DialPlotPanel extends GenericPlotPanel  implements PlotPanelInterfa
     public void addPlotValue(int plotIndex, double xValue, double yValue) throws NetPlotException 
     { 
       throw new NetPlotException("addPlotValue(double xValue, double yValue) is invalid for DialPlotPanel"); 
+    }
+    
+    public void addPlotValue(int plotIndex, Millisecond ms, double yValue) throws NetPlotException 
+    { 
+      throw new NetPlotException("addPlotValue(int plotIndex, Millisecond ms, double yValue) should not be used on DialPlotPanel"); 
     }
 
     public void finalize()

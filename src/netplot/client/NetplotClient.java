@@ -7,10 +7,14 @@
 package netplot.client;
 
 import java.net.*;
+import java.util.Calendar;
 import java.util.StringTokenizer;
 import java.io.*;
 import netplot.KeyWords;
+import netplot.LineProcessor;
+
 import java.util.*;
+import org.jfree.data.time.Millisecond;
 
 /**
  * Responsible for providing a client interface to the netplot server.
@@ -304,6 +308,65 @@ public class NetplotClient
   }
  
   /**
+   * Add values to an XY plot
+   * @param plotIndex  The index of the plot (0 = first plot added, 1=second etc)
+   * @param xValue     The value on the X axis
+   * @param yValue     The value on the Y axis
+   */
+  public void addTimeSeriesPlotValue(int plotIndex, Millisecond ms, double yValue) throws NetplotClientException, IOException
+  {
+    debugPrint("Adding TimeSeries plot "+plotIndex+" Millisecond "+ms+" value "+yValue);
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime( ms.getStart() );
+    String dateString = this.getDateString(calendar, ms.getMillisecond() );
+    sendCmd(plotIndex+":"+dateString+":"+yValue);
+  }
+  
+  /**
+   * Get date string.
+   * @param date The Date object to be converted to a string.
+   * @param ms The MilliSecond value to be included in the Date String.
+   * @return The String representation of the Date.
+   * 
+   * The format of the string returned is 
+   * <YEAR>;<MONTH>;<DAY OF MONTH>;<HOUR OF DAY>;<MINUTE>;<SECOND>;<MILLISECOND>
+   * 
+   * <YEAR>  = Year (1900-9999)
+   * <MONTH> = Month (1-12)
+   * <DAY OF MONTH> = Month (1-31)
+   * <HOUR OF DAY>  = Hour of day (0-23)
+   * <MINUTE>       = Minute (0-59)
+   * <SECOND>       = Second (0-59)
+   * <MILLISECOND>  = Millisecond (0-999)
+   * E.G
+   * 2013;00;02;23;10;05;587
+   * 
+   * Represents
+   * 
+   * 23:20:05:587 on 1 Jan 2013
+   * 
+   */
+  private String getDateString(Calendar calendar, long ms) {
+    StringBuffer sb= new StringBuffer();
+
+    sb.append(calendar.get(Calendar.YEAR));
+    sb.append(LineProcessor.TIMESTAMP_DELIM);
+    sb.append(calendar.get(Calendar.MONTH)+1);
+    sb.append(LineProcessor.TIMESTAMP_DELIM);
+    sb.append(calendar.get(Calendar.DAY_OF_MONTH));
+    sb.append(LineProcessor.TIMESTAMP_DELIM);
+    sb.append(calendar.get(Calendar.HOUR_OF_DAY));
+    sb.append(LineProcessor.TIMESTAMP_DELIM);
+    sb.append(calendar.get(Calendar.MINUTE));
+    sb.append(LineProcessor.TIMESTAMP_DELIM);
+    sb.append(calendar.get(Calendar.SECOND));
+    sb.append(LineProcessor.TIMESTAMP_DELIM);
+    sb.append(ms);
+
+    return sb.toString();
+  }
+  
+  /**
    * display a message.
    * 
    * @param message
@@ -393,56 +456,8 @@ public class NetplotClient
   }
       
   /**
-   * This completes the Netplot client code. The follwoing code is example code.
+   * This completes the Netplot client code. The following code is example code.
    */
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   public static void Delay(long delayMilliSeconds)
   {
     try
@@ -548,6 +563,38 @@ public class NetplotClient
     {
       double values[] = { Math.random()*10000 , Math.random()*100 };
       netPlot.addPlotValues(values);
+      i=i+1;
+    }
+  }
+  
+  /**
+   * Time series chart passing the time and the y value
+   */
+  public static void TimeExample4(NetplotClient netPlot) throws NetplotClientException, IOException
+  {
+    PlotConfig plotConfig = new PlotConfig();
+    plotConfig.plotName="Plot 0";
+    plotConfig.xAxisName="The X axis";
+    plotConfig.yAxisName="Y axis (Plot0)";
+    plotConfig.enableLines=true;
+    plotConfig.enableShapes=true;
+    plotConfig.enableAutoScale=true;
+    plotConfig.maxAgeSeconds=5;
+    netPlot.setPlotType("time", "TIME chart, passing the time and the y value.");
+    netPlot.addPlot(plotConfig);  
+    plotConfig.plotName="Plot 1";
+    //Add a new Y Axis
+    plotConfig.yAxisName="Y Axis (Plot1)";
+    netPlot.addPlot(plotConfig);
+    
+    int i=0;
+    int year=2013;
+    while(i< 10)
+    {
+      Millisecond ms1 = new Millisecond(0, 2, 3, 4, 1, 12, year+i);
+      Millisecond ms2 = new Millisecond(0, 2, 3, 4, 1, 12, year+i+1);
+      netPlot.addTimeSeriesPlotValue(0, ms1, Math.random()*100);
+      netPlot.addTimeSeriesPlotValue(1, ms2, Math.random()*100);
       i=i+1;
     }
   }
@@ -820,6 +867,7 @@ public class NetplotClient
   {
     boolean debug=false;
     int     port=9600;
+    NetplotClient netPlot0=null;
     NetplotClient netPlot1=null;
     NetplotClient netPlot2=null;
     NetplotClient netPlot3=null;
@@ -827,14 +875,16 @@ public class NetplotClient
     NetplotClient netPlot5=null;
     NetplotClient netPlot6=null;
     NetplotClient netPlot7=null;
+    NetplotClient netPlot8=null;
+    NetplotClient netPlot9=null;
 
-    NetplotClient netPlot0 = new NetplotClient(debug);          
+    netPlot0 = new NetplotClient(debug);          
     netPlot0.connect(address, port);
     
     if( initWindow )
     {
       //Set these non plot or chart specific parameters on first connection
-      netPlot0.setGrid(3,3);
+      netPlot0.setGrid(4,5);
       netPlot0.setWindowTitle("Java netplot client demo");
     }
     try {
@@ -844,33 +894,37 @@ public class NetplotClient
       netPlot1.connect(address, port+1);
       NetplotClient.TimeExample2(netPlot1);
   
-      netPlot1 = new NetplotClient(debug);          
-      netPlot1.connect(address, port+2);
-      NetplotClient.TimeExample3(netPlot1);
-  
       netPlot2 = new NetplotClient(debug);          
-      netPlot2.connect(address, port+3);
-      NetplotClient.BarExample(netPlot2);
+      netPlot2.connect(address, port+2);
+      NetplotClient.TimeExample3(netPlot2);
   
       netPlot3 = new NetplotClient(debug);          
-      netPlot3.connect(address, port+4);
-      NetplotClient.XYExample1(netPlot3);
-  
+      netPlot3.connect(address, port+3);
+      NetplotClient.TimeExample4(netPlot3);
+      
       netPlot4 = new NetplotClient(debug);          
-      netPlot4.connect(address, port+5);
-      NetplotClient.XYExample2(netPlot4);
+      netPlot4.connect(address, port+4);
+      NetplotClient.BarExample(netPlot4);
   
       netPlot5 = new NetplotClient(debug);          
-      netPlot5.connect(address, port+6);
-      NetplotClient.XYExample3(netPlot5);
+      netPlot5.connect(address, port+5);
+      NetplotClient.XYExample1(netPlot5);
   
       netPlot6 = new NetplotClient(debug);          
-      netPlot6.connect(address, port+7);
-      NetplotClient.DialExample(netPlot6);
+      netPlot6.connect(address, port+6);
+      NetplotClient.XYExample2(netPlot6);
   
       netPlot7 = new NetplotClient(debug);          
-      netPlot7.connect(address, port+8);
-      NetplotClient.CachedPlot(netPlot7);
+      netPlot7.connect(address, port+7);
+      NetplotClient.XYExample3(netPlot7);
+  
+      netPlot8 = new NetplotClient(debug);          
+      netPlot8.connect(address, port+8);
+      NetplotClient.DialExample(netPlot8);
+  
+      netPlot9 = new NetplotClient(debug);          
+      netPlot9.connect(address, port+9);
+      NetplotClient.CachedPlot(netPlot9);
     }
     finally {
       if( netPlot0 != null ) {
@@ -882,8 +936,8 @@ public class NetplotClient
       if( netPlot2 != null ) {
         netPlot2.disconnect();
       }
-      if( netPlot3 != null ) {
-        netPlot3.disconnect();
+      if( netPlot4 != null ) {
+        netPlot4.disconnect();
       }
       if( netPlot4 != null ) {
         netPlot4.disconnect();
@@ -896,6 +950,12 @@ public class NetplotClient
       }
       if( netPlot7 != null ) {
         netPlot7.disconnect();
+      }
+      if( netPlot8 != null ) {
+        netPlot8.disconnect();
+      }
+      if( netPlot9 != null ) {
+        netPlot9.disconnect();
       }
     }
   }

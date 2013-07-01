@@ -118,3 +118,26 @@
 	<math.h>
 	"netplot_client.h"
 
+1372655891 source:/home/pja/development/eclipse/workspace/netplot/c_client/netplot_client.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<sys/socket.h>
+	<syslog.h>
+	<arpa/inet.h>
+	<string.h>
+	<unistd.h>
+	<netinet/in.h>
+	<netinet/tcp.h>
+	"netplot_client.h"
+
+1372655908 /home/pja/development/eclipse/workspace/netplot/c_client/netplot_client.h
+
+1372655656 source:/home/pja/development/eclipse/workspace/netplot/c_client/netplot_demo.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<math.h>
+	"netplot_client.h"
+

@@ -86,6 +86,8 @@ static void time_example_1(int server_connection_index)
     float val;
     struct _plot_config pc;
 
+    memset(&pc, 0 , sizeof(pc) );
+
     load_default_plotConfig(&pc);
     strncpy(pc.plotName, "Plot 0", MAX_STR_LEN);
     strncpy(pc.xAxisName, "The X axis", MAX_STR_LEN);
@@ -120,6 +122,8 @@ static void time_example_2(int server_connection_index)
     char    plotNames[PLOT_COUNT][7+1] = {"Sine","Cosine","Tangent"};
     int     plotIndex;
     float   x;
+
+    memset(&pc, 0 , sizeof(pc) );
 
     load_default_plotConfig(&pc);
     strncpy(pc.xAxisName, "The X axis", MAX_STR_LEN);
@@ -161,6 +165,8 @@ static void time_example_3(int server_connection_index)
     float vals[2];
     struct _plot_config pc;
 
+    memset(&pc, 0 , sizeof(pc) );
+
     load_default_plotConfig(&pc);
     strncpy(pc.plotName, "Plot 0", MAX_STR_LEN);
     strncpy(pc.xAxisName, "The X axis", MAX_STR_LEN);
@@ -188,12 +194,70 @@ static void time_example_3(int server_connection_index)
 }
 
 /**
+ * Two plots on a time series chartTime series chart passing the time and the y value
+ **/
+static void time_example_4(int server_connection_index)
+{
+    struct _plot_config pc;
+    struct _time_series_point *tsp0;
+    struct _time_series_point *tsp1;
+
+    memset(&pc, 0 , sizeof(pc) );
+
+    load_default_plotConfig(&pc);
+    strncpy(pc.plotName, "Plot 0", MAX_STR_LEN);
+    strncpy(pc.xAxisName, "The X axis", MAX_STR_LEN);
+    strncpy(pc.yAxisName, "The Y axis (Plot0)", MAX_STR_LEN);
+    pc.enableLines=1;
+    pc.enableShapes=1;
+    pc.enableAutoScale=1;
+    pc.maxAgeSeconds=5;
+    pc.tickCount=1000;
+    netplot_set_plot_type(server_connection_index, PLOT_TYPE_TIME, "TIME chart, passing the time and the y value.");
+    netplot_add_plot(server_connection_index, pc);
+
+    strncpy(pc.yAxisName, "The Y axis (Plot1)", MAX_STR_LEN);
+    netplot_add_plot(server_connection_index, pc);
+
+    tsp0=calloc(1, sizeof(struct _time_series_point) );
+    tsp1=calloc(1, sizeof(struct _time_series_point) );
+
+    tsp0->year=2013;
+    tsp0->month=1;
+    tsp0->day=1;
+    tsp0->hour=2;
+    tsp0->minute=35;
+    tsp0->second=20;
+    tsp0->mill_second=495;
+
+    memcpy(tsp1, tsp0, sizeof(struct _time_series_point) );
+
+    int i=0;
+    while( i< 10)
+    {
+        tsp0->value=get_random(0,10000);
+        tsp1->value=get_random(0,10000);
+
+        netplot_add_time_series_plot_value(server_connection_index, 0, tsp0);
+        netplot_add_time_series_plot_value(server_connection_index, 1, tsp1);
+        i++;
+        tsp0->year++;
+        tsp1->year++;
+    }
+
+    free(tsp0);
+    free(tsp1);
+}
+
+/**
  * Bar chart example
  **/
 static void bar_example(int server_connection_index)
 {
     float val;
     struct _plot_config pc;
+
+    memset(&pc, 0 , sizeof(pc) );
 
     load_default_plotConfig(&pc);
     strncpy(pc.plotName, "Plot 0", MAX_STR_LEN);
@@ -221,6 +285,9 @@ static void xy_example1(int server_connection_index)
     float x_val, y_val;
     struct _plot_config pc0;
     struct _plot_config pc1;
+
+    memset(&pc0, 0 , sizeof(pc0) );
+    memset(&pc1, 0 , sizeof(pc1) );
 
     load_default_plotConfig(&pc1);
     strncpy(pc0.plotName, "Plot 0", MAX_STR_LEN);
@@ -258,7 +325,9 @@ static void xy_example1(int server_connection_index)
 
         netplot_add_xy_plot_values(server_connection_index, 1, x_val, y_val);
         i++;
+
     }
+
 }
 
 /**
@@ -267,6 +336,8 @@ static void xy_example1(int server_connection_index)
 static void xy_example2(int server_connection_index)
 {
     struct _plot_config pc;
+
+    memset(&pc, 0 , sizeof(pc) );
 
     load_default_plotConfig(&pc);
     strncpy(pc.plotName, "Plot 0", MAX_STR_LEN);
@@ -295,6 +366,11 @@ static void xy_example2(int server_connection_index)
 static void xy_example3(int server_connection_index)
 {
     struct _plot_config pc0, pc1, pc2, pc3;
+
+    memset(&pc0, 0 , sizeof(pc0) );
+    memset(&pc1, 0 , sizeof(pc1) );
+    memset(&pc2, 0 , sizeof(pc2) );
+    memset(&pc3, 0 , sizeof(pc3) );
 
     load_default_plotConfig(&pc0);
     strncpy(pc0.plotName, "Plot 0", MAX_STR_LEN);
@@ -376,6 +452,8 @@ static void show_dial_example(int server_connection_index)
     float values[2];
     struct _plot_config pc;
 
+    memset(&pc, 0 , sizeof(pc) );
+
     netplot_set_plot_type(server_connection_index, PLOT_TYPE_DIAL, "Number and MAX");
 
     load_default_plotConfig(&pc);
@@ -425,6 +503,8 @@ static void show_cache_example(int server_connection_index)
     float   v;
     struct  _plot_config pc;
 
+    memset(&pc, 0 , sizeof(pc) );
+
     load_default_plotConfig(&pc);
     strncpy(pc.plotName, "Plot 0", MAX_STR_LEN);
     strncpy(pc.xAxisName, "The X axis name", MAX_STR_LEN);
@@ -469,8 +549,10 @@ int main(int argc, char *argv[])
         fatal("Failed to connect to netplot server @ %s",netplot_server_address);
     }
 
+    info("Netplot server version = %2.2f",netplot_get_server_version());
+
     //Set the number of panels (plot area's) on the GUI at the server
-    netplot_set_grid(3,3);
+    netplot_set_grid(4,4);
     //Set the GUI window title at the server
     netplot_set_window_title("C netplot client demo");
 
@@ -478,13 +560,14 @@ int main(int argc, char *argv[])
     time_example_1(0);
     time_example_2(1);
     time_example_3(2);
-    bar_example(3);
-    xy_example1(4);
-    xy_example2(5);
-    xy_example3(6);
-    show_dial_example(7);
-    //This function cutrrently blocks continually updating a plot
-    show_cache_example(8);
+    time_example_4(3);
+    bar_example(4);
+    xy_example1(5);
+    xy_example2(6);
+    xy_example3(7);
+    show_dial_example(8);
+    //This function currently blocks continually updating a plot
+    show_cache_example(9);
 
     //Disconnect all client connectiions to the server
     netplot_disconnect();

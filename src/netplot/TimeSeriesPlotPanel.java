@@ -83,6 +83,11 @@ public class TimeSeriesPlotPanel extends GenericPlotPanel implements PlotPanelIn
     throw new NetPlotException("addPlotValue(int plotIndex, double xValue, double yValue) should not be used on TimeSeriesPlotPanel"); 
   }
 
+  public void addPlotValue(int plotIndex, Millisecond ms, double yValue) throws NetPlotException 
+  { 
+    timeSeriesList.get((int)plotIndex).addOrUpdate(ms, yValue);
+  }
+
   public void removePlots()
   {
     init();

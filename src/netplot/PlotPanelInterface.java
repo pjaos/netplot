@@ -6,6 +6,8 @@
 
 package netplot;
 
+import org.jfree.data.time.Millisecond;
+
 public interface PlotPanelInterface
 {
   //Set plot attributes
@@ -17,6 +19,7 @@ public interface PlotPanelInterface
   //These are called to add a plot value
   public abstract void addPlotValue(double xValue, double yValue) throws NetPlotException;
   public abstract void addPlotValue(int plotIndex, double xValue, double yValue) throws NetPlotException;
+  public abstract void addPlotValue(int plotIndex, Millisecond ms, double yValue) throws NetPlotException;
 
   public abstract void init();
   public abstract int  getPlotCount();

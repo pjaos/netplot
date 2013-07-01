@@ -17,6 +17,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.Range;
+import org.jfree.data.time.Millisecond;
 import org.jfree.data.xy.XYBarDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -106,8 +107,13 @@ public class BarPlotPanel extends GenericPlotPanel implements PlotPanelInterface
     xValue++;
   }
   
-  //Not implemented on TimeSeriesPlot
+  //Not implemented on BarPlotPanel
   public void addPlotValue(int plotIndex, double xValue, double yValue) {}
+
+  public void addPlotValue(int plotIndex, Millisecond ms, double yValue) throws NetPlotException 
+  { 
+    throw new NetPlotException("addPlotValue(int plotIndex, Millisecond ms, double yValue) should not be used on BarPlotPanel"); 
+  }
 
   public void removePlots()
   {

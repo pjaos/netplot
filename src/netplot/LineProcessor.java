@@ -9,6 +9,9 @@ package netplot;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.*;
+
+import org.jfree.data.time.Millisecond;
+
 import java.util.*;
 
 /**
@@ -24,6 +27,7 @@ public class LineProcessor
   private PlotPanelInterface    plotPanelInterface;
   private int                   panelIndex;
   private int                   maxPanelIndex;
+  public static final String    TIMESTAMP_DELIM=";";
   
   public LineProcessor(int panelIndex, int maxPanelIndex)
   {
@@ -170,11 +174,40 @@ public class LineProcessor
       }
       if( line.indexOf(':') != -1 )
       {
-        Double valueList[] = getValues(line);
-        for( int i=0 ; i<valueList.length ; i=i+3 )
+        //If the line contains chars indicating it contains a time stamp
+        if( line.indexOf(LineProcessor.TIMESTAMP_DELIM) != -1 )
         {
-          plotPanelInterface.addPlotValue((int)valueList[i].doubleValue(), valueList[i+1], valueList[i+2]);
-        }        
+          Scanner dateStrScanner = new Scanner(line);
+          dateStrScanner.useDelimiter(":");
+          //Extract the parameters
+          int plotIndex = dateStrScanner.nextInt();
+          String dateString = dateStrScanner.next();
+          double yValue = dateStrScanner.nextDouble();
+          Scanner dateScanner = new Scanner(dateString);
+          dateScanner.useDelimiter(LineProcessor.TIMESTAMP_DELIM);
+          int year        = dateScanner.nextInt();
+          int month       = dateScanner.nextInt();
+          int day         = dateScanner.nextInt();
+          int hour        = dateScanner.nextInt();
+          int minute      = dateScanner.nextInt();
+          int second      = dateScanner.nextInt();
+          int milliSecond = dateScanner.nextInt();
+          Millisecond ms  = new Millisecond(milliSecond,
+                                           second,
+                                           minute,
+                                           hour,
+                                           day,
+                                           month,
+                                           year);          
+          plotPanelInterface.addPlotValue(plotIndex, ms, yValue);
+        }
+        else {
+          Double valueList[] = getValues(line);
+          for( int i=0 ; i<valueList.length ; i=i+3 )
+          {
+            plotPanelInterface.addPlotValue((int)valueList[i].doubleValue(), valueList[i+1], valueList[i+2]);
+          }     
+        }
       }
       else
       {

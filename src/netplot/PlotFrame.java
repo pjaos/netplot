@@ -16,6 +16,12 @@ import org.jfree.ui.RefineryUtilities;
 /*
  * Change log
  * 
+ * 1.5
+ * - Add the ability to plot time periods not in real time. Previously when a value 
+ *   to be plotted was added the time at which the value was received was used as 
+ *   X axis time value. No it is possible to pass the time stamp from the client 
+ *   to the server in order to plot old time series data.
+ * 
  * 1.4
  * - If a bind error on the TCP ports used by the netplot GUI server then report the
  *   port error in the error message.
@@ -67,7 +73,7 @@ import org.jfree.ui.RefineryUtilities;
  */
 public class PlotFrame extends JFrame
 { 
-  public static final double NETPLOT_VERSION=1.4;
+  public static final double NETPLOT_VERSION=1.5;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",
@@ -184,7 +190,14 @@ public class PlotFrame extends JFrame
       "* then send",
       "* 1:50:60",
       "* ",   
+      "* When plotting to a time series plot you would send",   
+      "* 0:2013;00;02;23;10;05;587:1.234",
+      "*  Plot index 0 (digit before first colon)",   
+      "*  Timestamp=Jan 02 2013 23:10:05 and 587 microseconds",   
+      "*  value=1.234",   
+      "* ",   
       };
+  
   StatusBar statusBar;
   private JPanel mainPanel = new JPanel( new BorderLayout() );
   private JPanel chartPanel = new JPanel();

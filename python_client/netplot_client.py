@@ -8,6 +8,7 @@
 
 import socket
 import types
+import types
 
 VALID_PLOT_TYPES=['time','bar','xy', 'dial']
 
@@ -48,6 +49,9 @@ class PlotConfig:
     self.tickCount=0
     
 class NetPlot:
+    
+  TIMESTAMP_DELIM=";"
+
   def __init__(self,debug=0):
     #If debug set on then debug messages will be shown on stdout
     self.__debug=debug
@@ -61,6 +65,7 @@ class NetPlot:
                                 #to the server to add these plot points.
     self.__plotValueCache=[]    
     self.sock = None
+
 
   def __debugPrint(self, message):
     """Display debug messages if required"""
@@ -204,6 +209,17 @@ class NetPlot:
     else:
       self.__debugPrint("%s is of an unsupported type (%s), cannot plot" % (repr(value), repr(type(value)))) 
 
+  def _getDateTimeString(self, dateTimeObj):
+    """Get the date time string in the required format to plot time series plots."""   
+    return ""+str(dateTimeObj.year)+NetPlot.TIMESTAMP_DELIM+\
+              str(dateTimeObj.month)+NetPlot.TIMESTAMP_DELIM+\
+              str(dateTimeObj.day)+NetPlot.TIMESTAMP_DELIM+\
+              str(dateTimeObj.hour)+NetPlot.TIMESTAMP_DELIM+\
+              str(dateTimeObj.minute)+NetPlot.TIMESTAMP_DELIM+\
+              str(dateTimeObj.second)+NetPlot.TIMESTAMP_DELIM+\
+              str(dateTimeObj.microsecond/1000)
+    
+    
   def addPlotValues(self, values):
     """Add the plot values
 
@@ -215,16 +231,33 @@ class NetPlot:
     self.__debugPrint('Adding plot values: %s' % (repr(values))  )
     cmdString=""
     firstValue=1
+    plotIndex=0
     for value in values:
-      if firstValue:
-        cmdString=self.__getValue(value)
+      #Check for a list, if found this is a TimeSeriesPlot
+      if isinstance(value, types.ListType):
+          #If we have a list here then each element has two elements
+          #0 = A datetime object
+          #1 = A float value to be plotted on a timeSeriesPlot
+          if len(value) != 2:
+            self.__debugPrint("Expected two values in time series plot but got %d" % (len(values)) )
+          else:
+            dateTimeObj=value[0]
+            floatValue=value[1]
+            timeStampStr = self._getDateTimeString(dateTimeObj)
+            cmdString="%d:%s:%s" % (plotIndex,timeStampStr, self.__getValue(floatValue))
+            self.sendCmd(cmdString)
+            plotIndex=plotIndex+1
+              
       else:
-        cmdString="%s,%s" % (cmdString,self.__getValue(value))
-      firstValue=0
-    if self.__cacheEnabled:
-      self.__plotValueCache.append(cmdString)
-    else:
-      self.sendCmd(cmdString)
+          if firstValue:
+            cmdString=self.__getValue(value)
+          else:
+            cmdString="%s,%s" % (cmdString,self.__getValue(value))
+          firstValue=0
+          if self.__cacheEnabled:
+            self.__plotValueCache.append(cmdString)
+          else:
+            self.sendCmd(cmdString)
 
   def addXYPlotValues(self, plotIndex, xValue, yValue):
     """Add the XY plot values
