@@ -110,7 +110,7 @@ def timeExample4(netPlot):
   t2 = datetime.now()
   t2=t2+timedelta(seconds=10000)
   while i<10:
-    netPlot.addPlotValues([[t1,random.randint(1000,10000)],[t2,random.randint(1000,10000)]])
+    netPlot.addPlotValues([[t1,float(1.395*random.randint(0,10))],[t2,float(1.395*random.randint(0,10))]])
     #Inc time by a year
     t1=t1+timedelta(seconds=60*60*24*365)
     t2=t2+timedelta(seconds=60*60*24*365)
