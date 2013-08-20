@@ -231,7 +231,6 @@ class NetPlot:
     self.__debugPrint('Adding plot values: %s' % (repr(values))  )
     cmdString=""
     firstValue=1
-    plotIndex=0
     for value in values:
         if firstValue:
           cmdString=self.__getValue(value)
