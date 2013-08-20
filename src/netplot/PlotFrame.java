@@ -16,6 +16,11 @@ import org.jfree.ui.RefineryUtilities;
 /*
  * Change log
  * 
+ * 1.6
+ * If we don't have a valid number to plot fro a timeseries plot we ignore it. 
+ * and do not generate an error as on a time series graph we may not have 
+ * values for all points in time for all plots.
+ * 
  * 1.5
  * - Add the ability to plot time periods not in real time. Previously when a value 
  *   to be plotted was added the time at which the value was received was used as 

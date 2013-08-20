@@ -233,32 +233,26 @@ class NetPlot:
     firstValue=1
     plotIndex=0
     for value in values:
-      #Check for a list, if found this is a TimeSeriesPlot
-      if isinstance(value, types.ListType):
-          #If we have a list here then each element has two elements
-          #0 = A datetime object
-          #1 = A float value to be plotted on a timeSeriesPlot
-          if len(value) != 2:
-            self.__debugPrint("Expected two values in time series plot but got %d" % (len(values)) )
-          else:
-            dateTimeObj=value[0]
-            floatValue=value[1]
-            timeStampStr = self._getDateTimeString(dateTimeObj)
-            cmdString="%d:%s:%s" % (plotIndex,timeStampStr, self.__getValue(floatValue))
-            self.sendCmd(cmdString)
-            plotIndex=plotIndex+1
-              
-      else:
-          if firstValue:
-            cmdString=self.__getValue(value)
-          else:
-            cmdString="%s,%s" % (cmdString,self.__getValue(value))
-          firstValue=0
-          if self.__cacheEnabled:
-            self.__plotValueCache.append(cmdString)
-          else:
-            self.sendCmd(cmdString)
+        if firstValue:
+          cmdString=self.__getValue(value)
+        else:
+          cmdString="%s,%s" % (cmdString,self.__getValue(value))
+        firstValue=0
+        if self.__cacheEnabled:
+          self.__plotValueCache.append(cmdString)
+        else:
+          self.sendCmd(cmdString)
 
+  def addTimePlotValue(self, plotIndex, dateTimeObj, plotValue):
+    """The recommended way to send time series plot values where the time is passed from the 
+       netplot client to the netplot server (GUI)."""
+    timeStampStr = self._getDateTimeString(dateTimeObj)
+    cmdString="%d:%s:%s" % (plotIndex,timeStampStr, self.__getValue(plotValue))
+    if self.__cacheEnabled:
+      self.__plotValueCache.append(cmdString)
+    else:
+      self.sendCmd(cmdString)
+    
   def addXYPlotValues(self, plotIndex, xValue, yValue):
     """Add the XY plot values
     """ 

@@ -580,13 +580,15 @@ public class NetplotClient
     plotConfig.enableShapes=true;
     plotConfig.enableAutoScale=true;
     plotConfig.maxAgeSeconds=5;
-    netPlot.setPlotType("time", "TIME chart, passing the time and the y value.");
+    netPlot.setPlotType("time", "TIME chart, passing the time and the y valuev (cached).");
     netPlot.addPlot(plotConfig);  
     plotConfig.plotName="Plot 1";
     //Add a new Y Axis
     plotConfig.yAxisName="Y Axis (Plot1)";
     netPlot.addPlot(plotConfig);
-    
+    //We enable cache on this plot. Therefore 
+    //data won't be sent until the netPlot.update() method is called.
+    netPlot.cacheEnabled=true;
     int i=0;
     int year=2013;
     while(i< 10)
@@ -597,6 +599,7 @@ public class NetplotClient
       netPlot.addTimeSeriesPlotValue(1, ms2, Math.random()*100);
       i=i+1;
     }
+    netPlot.update();
   }
   
   /**

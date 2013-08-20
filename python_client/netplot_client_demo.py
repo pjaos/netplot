@@ -87,8 +87,8 @@ def timeExample3(netPlot):
   while i<10:
     netPlot.addPlotValues([random.randint(1000,10000),random.randint(10,100)])
     i=i+1
-
-def timeExample4(netPlot):
+  
+def timeExample5(netPlot):
   """Time series chart passing the time and the y value"""
   plotConfig = PlotConfig()
   plotConfig.plotName="Plot 0"
@@ -98,23 +98,37 @@ def timeExample4(netPlot):
   plotConfig.enableShapes=1
   plotConfig.enableAutoScale=1
   plotConfig.maxAgeSeconds=5
-  netPlot.setPlotType('time', title="TIME chart, passing the time and the y value.")
+  netPlot.setPlotType('time', title="TIME chart, passing the time and the y value (cached).")
   netPlot.addPlot(plotConfig)  
   plotConfig.plotName="Plot 1"
   #Add a new Y Axis
   plotConfig.yAxisName="Y Axis (Plot1)"
   netPlot.addPlot(plotConfig)  
+  #We enable cache on this plot. Therefore 
+  #data won't be sent until the netPlot.update() method is called.
+  netPlot.enableCache(True)
 
-  i=0
+
   t1 = datetime.now()
+  
+  #Update first plot
+  i=0
+  while i<10:    
+    netPlot.addTimePlotValue(0, t1, float(1.395*random.randint(0,10) ) )
+    t1=t1+timedelta(seconds=60*60*24*365)
+    i=i+1
+                             
   t2 = datetime.now()
   t2=t2+timedelta(seconds=10000)
-  while i<10:
-    netPlot.addPlotValues([[t1,float(1.395*random.randint(0,10))],[t2,float(1.395*random.randint(0,10))]])
-    #Inc time by a year
-    t1=t1+timedelta(seconds=60*60*24*365)
+  #Update second plot
+  i=0
+  while i<10:    
+    netPlot.addTimePlotValue(1, t2, float(1.395*random.randint(0,10) ) )
     t2=t2+timedelta(seconds=60*60*24*365)
     i=i+1
+        
+  netPlot.update()
+
     
 def barExample(netPlot):
   """Bar chart example"""
@@ -339,7 +353,7 @@ def showAllExamples(address, initWindow, debug=0, port=9600):
 
   netPlot3 = NetPlot(debug=debug)          
   netPlot3.connect(address, port+3)
-  timeExample4(netPlot3)
+  timeExample5(netPlot3)
 
   netPlot4 = NetPlot(debug=debug)          
   netPlot4.connect(address, port+4)

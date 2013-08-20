@@ -2,12 +2,12 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="netplot_client.c" open="1" top="0" tabpos="3">
-		<Cursor position="11780" topLine="402" />
+		<Cursor position="26201" topLine="933" />
 	</File>
 	<File name="netplot_client.h" open="1" top="0" tabpos="2">
 		<Cursor position="3458" topLine="41" />
 	</File>
 	<File name="netplot_demo.c" open="1" top="1" tabpos="1">
-		<Cursor position="16616" topLine="524" />
+		<Cursor position="7265" topLine="227" />
 	</File>
 </CodeBlocks_layout_file>

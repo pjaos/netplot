@@ -213,11 +213,15 @@ static void time_example_4(int server_connection_index)
     pc.enableAutoScale=1;
     pc.maxAgeSeconds=5;
     pc.tickCount=1000;
-    netplot_set_plot_type(server_connection_index, PLOT_TYPE_TIME, "TIME chart, passing the time and the y value.");
+    netplot_set_plot_type(server_connection_index, PLOT_TYPE_TIME, "TIME chart, passing the time and the y value (cached).");
     netplot_add_plot(server_connection_index, pc);
 
     strncpy(pc.yAxisName, "The Y axis (Plot1)", MAX_STR_LEN);
     netplot_add_plot(server_connection_index, pc);
+
+    //We enable cache on this plot. Therefore
+    //data won't be sent until the netPlot.update() method is called.
+    netplot_enable_cache(1);
 
     tsp0=calloc(1, sizeof(struct _time_series_point) );
     tsp1=calloc(1, sizeof(struct _time_series_point) );
@@ -244,9 +248,15 @@ static void time_example_4(int server_connection_index)
         tsp0->year++;
         tsp1->year++;
     }
+    netplot_update(0);
+    netplot_update(1);
 
     free(tsp0);
     free(tsp1);
+
+    //Disable cache update or subsequent plots will cache their plots
+    netplot_enable_cache(0);
+
 }
 
 /**
@@ -519,11 +529,10 @@ static void show_cache_example(int server_connection_index)
     netplot_add_plot(server_connection_index, pc);
 
     //These must be called after the plot type is added
-    //Enables cached operation, update() will draw all plot points
+    //Enables cached operation, netplot_update() will draw all plot points
     netplot_enable_cache(1);
     //Not printing status messages may speed up plotting if CPU bound
     netplot_enable_status_messages(0);
-
     while(1)
     {
         netplot_replot(server_connection_index, 0);
