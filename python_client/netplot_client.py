@@ -76,9 +76,14 @@ class NetPlot:
     """Connect to the server running the netplot GUI (Java) program"""
     self.__hostAddress=hostAddress
     self.__port=port
-    self.__debugPrint('Connecting to %s:%d' % (self.__hostAddress, self.__port) )
-    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    self.sock.connect((self.__hostAddress, self.__port))
+    
+    try:
+      self.__debugPrint('Connecting to %s:%d' % (self.__hostAddress, self.__port) )
+      self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      self.sock.connect((self.__hostAddress, self.__port))
+    except socket.error:
+      raise socket.error("netplot connect failed to %s:%d" % (self.__hostAddress, self.__port) )
+         
     self.__debugPrint('Connected to %s:%d' % (self.__hostAddress, self.__port) )
     #Wait for initial connection message
     rxData = self.sock.recv(256)
