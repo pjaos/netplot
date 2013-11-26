@@ -250,8 +250,8 @@ class NetPlot:
   def updateIfRequired(self):
       """Call a plot update if we need to do so because there are a lot of plot points outstanding."""
       if self.__cacheEnabled:
-          #Ensure we don't have more than 50 plot points outstanding
-          if len(self.__plotValueCache) > 50:
+          #Ensure we don't have more than 200 plot points outstanding
+          if len(self.__plotValueCache) > 200:
               self.update()
 
   def addTimePlotValue(self, plotIndex, dateTimeObj, plotValue):
