@@ -76,14 +76,13 @@ class NetPlot:
     """Connect to the server running the netplot GUI (Java) program"""
     self.__hostAddress=hostAddress
     self.__port=port
-    
     try:
-      self.__debugPrint('Connecting to %s:%d' % (self.__hostAddress, self.__port) )
-      self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      self.sock.connect((self.__hostAddress, self.__port))
+        self.__debugPrint('Connecting to %s:%d' % (self.__hostAddress, self.__port) )
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((self.__hostAddress, self.__port))
     except socket.error:
-      raise socket.error("netplot connect failed to %s:%d" % (self.__hostAddress, self.__port) )
-         
+        raise socket.error("netplot connect failed to %s:%d" % (self.__hostAddress, self.__port) )
+        
     self.__debugPrint('Connected to %s:%d' % (self.__hostAddress, self.__port) )
     #Wait for initial connection message
     rxData = self.sock.recv(256)
@@ -244,8 +243,16 @@ class NetPlot:
         firstValue=0
         if self.__cacheEnabled:
           self.__plotValueCache.append(cmdString)
+          self.updateIfRequired()
         else:
           self.sendCmd(cmdString)
+        
+  def updateIfRequired(self):
+      """Call a plot update if we need to do so because there are a lot of plot points outstanding."""
+      if self.__cacheEnabled:
+          #Ensure we don't have more than 50 plot points outstanding
+          if len(self.__plotValueCache) > 50:
+              self.update()
 
   def addTimePlotValue(self, plotIndex, dateTimeObj, plotValue):
     """The recommended way to send time series plot values where the time is passed from the 
@@ -254,6 +261,8 @@ class NetPlot:
     cmdString="%d:%s:%s" % (plotIndex,timeStampStr, self.__getValue(plotValue))
     if self.__cacheEnabled:
       self.__plotValueCache.append(cmdString)
+      self.updateIfRequired()
+      
     else:
       self.sendCmd(cmdString)
     
@@ -264,6 +273,7 @@ class NetPlot:
     msg="%d:%E:%E" % (plotIndex,xValue,yValue)
     if self.__cacheEnabled:
       self.__plotValueCache.append(msg)
+      self.updateIfRequired()
     else:
       self.sendCmd(msg)
 
