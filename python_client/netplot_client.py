@@ -9,6 +9,7 @@
 import socket
 import types
 import types
+import time
 
 VALID_PLOT_TYPES=['time','bar','xy', 'dial']
 
@@ -214,15 +215,32 @@ class NetPlot:
       self.__debugPrint("%s is of an unsupported type (%s), cannot plot" % (repr(value), repr(type(value)))) 
 
   def _getDateTimeString(self, dateTimeObj):
-    """Get the date time string in the required format to plot time series plots."""   
-    return ""+str(dateTimeObj.year)+NetPlot.TIMESTAMP_DELIM+\
-              str(dateTimeObj.month)+NetPlot.TIMESTAMP_DELIM+\
-              str(dateTimeObj.day)+NetPlot.TIMESTAMP_DELIM+\
-              str(dateTimeObj.hour)+NetPlot.TIMESTAMP_DELIM+\
-              str(dateTimeObj.minute)+NetPlot.TIMESTAMP_DELIM+\
-              str(dateTimeObj.second)+NetPlot.TIMESTAMP_DELIM+\
-              str(dateTimeObj.microsecond/1000)
-    
+    """Get the date time string in the required format to plot time series plots.""" 
+    try:
+        return ""+str(dateTimeObj.year)+NetPlot.TIMESTAMP_DELIM+\
+                  str(dateTimeObj.month)+NetPlot.TIMESTAMP_DELIM+\
+                  str(dateTimeObj.day)+NetPlot.TIMESTAMP_DELIM+\
+                  str(dateTimeObj.hour)+NetPlot.TIMESTAMP_DELIM+\
+                  str(dateTimeObj.minute)+NetPlot.TIMESTAMP_DELIM+\
+                  str(dateTimeObj.second)+NetPlot.TIMESTAMP_DELIM+\
+                  str(dateTimeObj.microsecond/1000)
+    except AttributeError:
+        #If we get here we sssume that dateTimeObj is a float obtained by calling time.gmtime()
+        a=[]
+        a.append(time.strftime("%Y", dateTimeObj))
+        a.append(NetPlot.TIMESTAMP_DELIM)
+        a.append(time.strftime("%m", dateTimeObj))
+        a.append(NetPlot.TIMESTAMP_DELIM)
+        a.append(time.strftime("%d", dateTimeObj))
+        a.append(NetPlot.TIMESTAMP_DELIM)
+        a.append(time.strftime("%H", dateTimeObj))
+        a.append(NetPlot.TIMESTAMP_DELIM)
+        a.append(time.strftime("%M", dateTimeObj))
+        a.append(NetPlot.TIMESTAMP_DELIM)
+        a.append(time.strftime("%S", dateTimeObj))
+        a.append(NetPlot.TIMESTAMP_DELIM)
+        a.append("0")
+        return "".join(a)
     
   def addPlotValues(self, values):
     """Add the plot values
@@ -248,7 +266,7 @@ class NetPlot:
           self.sendCmd(cmdString)
         
   def updateIfRequired(self):
-      """Call a plot update if we need to do so because there are a lot of plot points outstanding."""
+      """Call a plot update if we need to do so becausethere are a lot of plot points outstanding."""
       if self.__cacheEnabled:
           #Ensure we don't have more than 200 plot points outstanding
           if len(self.__plotValueCache) > 200:
