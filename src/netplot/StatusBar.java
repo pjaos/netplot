@@ -19,6 +19,7 @@ import java.awt.event.*;
  */
 public class StatusBar extends JPanel implements ActionListener, MouseListener
 {
+  static final long serialVersionUID=6;
   private JLabel statusBarLabel = new JLabel();
   private JFrame historyFrame;
   private JTextArea messageField;
@@ -37,7 +38,6 @@ public class StatusBar extends JPanel implements ActionListener, MouseListener
     messageField.setFont( new Font("Monospaced", Font.PLAIN, 11) );
     historyFrame.getContentPane().add( new JScrollPane(messageField) );
     historyFrame.pack();
-//    RefineryUtilities.centerFrameOnScreen(historyFrame);
     addMouseListener(this);
     statusBarLabel.addMouseListener(this);
     statusBarLabel.setToolTipText(ToolTip);

@@ -72,6 +72,7 @@ def timeExample3(netPlot):
   plotConfig.xAxisName="The X axis"
   plotConfig.yAxisName="Y axis (Plot0)"
   plotConfig.enableLines=1
+  plotConfig.lineWidth=4
   plotConfig.enableShapes=1
   plotConfig.enableAutoScale=1
   #plotConfig.minScaleValue=0
@@ -80,6 +81,7 @@ def timeExample3(netPlot):
   netPlot.setPlotType('time', title="TIME chart, two traces with different linear Y scales, both autoscaled")
   netPlot.addPlot(plotConfig)  
   plotConfig.plotName="Plot 1"
+  plotConfig.lineWidth=7
   #Add a new Y Axis
   plotConfig.yAxisName="Y Axis (Plot1)"
   netPlot.addPlot(plotConfig)  

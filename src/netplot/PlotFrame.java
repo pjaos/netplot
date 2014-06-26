@@ -16,10 +16,14 @@ import org.jfree.ui.RefineryUtilities;
 /*
  * Change log
  * 
+ * 1.7
+ * - Add ability to set the thickness of the plot lines to netplot. Updated all
+ *   clients and all demo's.
+ * 
  * 1.6
- * If we don't have a valid number to plot fro a timeseries plot we ignore it. 
- * and do not generate an error as on a time series graph we may not have 
- * values for all points in time for all plots.
+ * -   If we don't have a valid number to plot for a timeseries plot we ignore it. 
+ *   and do not generate an error as on a time series graph we may not have 
+ *   values for all points in time for all plots.
  * 
  * 1.5
  * - Add the ability to plot time periods not in real time. Previously when a value 
@@ -78,7 +82,8 @@ import org.jfree.ui.RefineryUtilities;
  */
 public class PlotFrame extends JFrame
 { 
-  public static final double NETPLOT_VERSION=1.5;
+  static final long serialVersionUID=5;
+  public static final double NETPLOT_VERSION=1.7;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",
@@ -136,6 +141,9 @@ public class PlotFrame extends JFrame
       "* ",   
       "* set "+KeyWords.ENABLE_LINES+"=true",   
       "* true/false, enables/disables printed lines on a plot",   
+      "* ",   
+      "* set "+KeyWords.LINE_WIDTH+"=X",   
+      "* Set the width (in pixels) of the lines to be used when above option is enabled (default="+GenericPlotPanel.DEFAULT_LINE_WIDTH+").",   
       "* ",   
       "* set "+KeyWords.ENABLE_SHAPES+"=true",   
       "* true/false, enables/disables printed shapes (plot points) on a plot",   
@@ -252,7 +260,6 @@ public class PlotFrame extends JFrame
     removeAllPanels();
     chartPanel.setLayout( new GridLayout(rows,columns) );
     pack();
-//    RefineryUtilities.centerFrameOnScreen(this);
   }
   
   public static void main(String args[])
@@ -262,8 +269,6 @@ public class PlotFrame extends JFrame
     TimeSeriesPlotPanel plotPanel = new TimeSeriesPlotPanel();
     plotFrame.getContentPane().add(plotPanel);
     plotFrame.pack();
- //   RefineryUtilities.centerFrameOnScreen(plotFrame);
-
     
     plotFrame.setVisible(true);
     try

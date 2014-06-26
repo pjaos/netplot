@@ -22,6 +22,7 @@ import java.awt.*;
 
 public class XYPlotPanel extends GenericPlotPanel implements PlotPanelInterface
 {
+  static final long serialVersionUID=8;
   private JFreeChart            chart;
   private Vector<XYSeries>      xySeriesList;
   private Vector<Integer>       itemCountList;
@@ -68,7 +69,7 @@ public class XYPlotPanel extends GenericPlotPanel implements PlotPanelInterface
     
     XYSeriesCollection dataset = new XYSeriesCollection();
     dataset.addSeries( xySeries );
-    ((XYPlot)chart.getPlot()).setDataset(plotIndex, (XYDataset)dataset);    
+    ((XYPlot)chart.getPlot()).setDataset(plotIndex, (XYDataset)dataset);  
     genericConfig(chart, (XYPlot)chart.getPlot(), plotIndex); 
     itemCountList.add( new Integer(0) );
   }

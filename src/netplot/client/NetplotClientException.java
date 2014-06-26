@@ -8,6 +8,7 @@ package netplot.client;
 
 public class NetplotClientException extends Exception
 {
+  static final long serialVersionUID=9;
   public NetplotClientException(String message)
   {
     super(message);

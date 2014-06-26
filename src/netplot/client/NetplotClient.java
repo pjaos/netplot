@@ -242,6 +242,7 @@ public class NetplotClient
       sendSetCmd(KeyWords.X_AXIS_NAME,plotConfig.xAxisName);
       sendSetCmd(KeyWords.Y_AXIS_NAME,plotConfig.yAxisName);
       sendSetCmd(KeyWords.ENABLE_LINES,""+plotConfig.enableLines);
+      sendSetCmd(KeyWords.LINE_WIDTH,""+plotConfig.lineWidth);
       sendSetCmd(KeyWords.ENABLE_SHAPES,""+plotConfig.enableShapes);
       sendSetCmd(KeyWords.ENABLE_AUTOSCALE,""+plotConfig.enableAutoScale);
       sendSetCmd(KeyWords.MIN_SCALE_VALUE,""+plotConfig.minScaleValue);
@@ -548,12 +549,14 @@ public class NetplotClient
     plotConfig.enableLines=true;
     plotConfig.enableShapes=true;
     plotConfig.enableAutoScale=true;
+    plotConfig.lineWidth=4;
     //plotConfig.minScaleValue=0;
     //plotConfig.maxScaleValue=10000;
-    plotConfig.maxAgeSeconds=5;
+    plotConfig.maxAgeSeconds=3;
     netPlot.setPlotType("time", "TIME chart, two traces with different linear Y scales, both autoscaled");
     netPlot.addPlot(plotConfig);  
     plotConfig.plotName="Plot 1";
+    plotConfig.lineWidth=7;
     //Add a new Y Axis
     plotConfig.yAxisName="Y Axis (Plot1)";
     netPlot.addPlot(plotConfig);

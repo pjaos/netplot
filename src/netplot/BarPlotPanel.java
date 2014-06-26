@@ -24,6 +24,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class BarPlotPanel extends GenericPlotPanel implements PlotPanelInterface
 {
+  static final long serialVersionUID=1;
   private JFreeChart        chart;
   private XYSeries          series;
   private XYPlot            plot;
