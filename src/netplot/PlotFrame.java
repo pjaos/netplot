@@ -8,6 +8,7 @@ package netplot;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.JFrame;
@@ -17,6 +18,9 @@ import javax.swing.JScrollPane;
 
 /*
  * Change log
+ *
+ * 1.9
+ * - Maximising the frame is painful to use. Revert to previous approach.
  *
  * 1.8
  * - Enable auto flush on PrintWriter back to client in order to improve plot speed.
@@ -89,7 +93,7 @@ import javax.swing.JScrollPane;
 public class PlotFrame extends JFrame
 {
   static final long serialVersionUID=5;
-  public static final double NETPLOT_VERSION=1.8;
+  public static final double NETPLOT_VERSION=1.9;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",
@@ -233,8 +237,10 @@ public class PlotFrame extends JFrame
     getContentPane().add(mainPanel);
     mainPanel.add(statusBar,BorderLayout.SOUTH);
     JScrollPane jScrollPane = new JScrollPane(chartPanel);
+    jScrollPane.setPreferredSize( new Dimension(1024,768));
     mainPanel.add(jScrollPane,BorderLayout.CENTER);
-    setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+    pack();
+
     setChartLayout(1,1);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
   }
