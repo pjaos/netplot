@@ -6,42 +6,45 @@
 
 package netplot;
 
-import java.net.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 public class NetPlotSocketHandler extends Thread
 {
   private Socket            socket;
-  private LineProcessor     lineProcessor;
-  
+  private final LineProcessor     lineProcessor;
+
   public NetPlotSocketHandler(int panelIndex, int maxPanelIndex)
   {
     lineProcessor = new LineProcessor(panelIndex, maxPanelIndex);
   }
-  
+
   public synchronized void handle(Socket socket)
-  { 
+  {
     this.socket=socket;
     start();
   }
-  
+
   /**
    * Thread to handle the socket.
    */
-  public void run()
+  @Override
+public void run()
   {
     String line;
-    
+
     lineProcessor.initPlot();
     BufferedReader br=null;
     PrintWriter    pw=null;
     try
     {
       br = new BufferedReader( new InputStreamReader(socket.getInputStream()) );
-      pw = new PrintWriter( new PrintWriter(socket.getOutputStream()) );
+      pw = new PrintWriter( new PrintWriter(socket.getOutputStream()), true );
       //Send initial ID message
       pw.println("netplot_version="+PlotFrame.NETPLOT_VERSION);
-      pw.flush();
 
       while(true)
       {
@@ -52,7 +55,6 @@ public class NetPlotSocketHandler extends Thread
         }
         lineProcessor.processLine(line);
         pw.println("OK");
-        pw.flush();
       }
     }
     catch(Exception e)
@@ -67,7 +69,6 @@ public class NetPlotSocketHandler extends Thread
       {
         pw.println("ERROR: unknown");
       }
-      pw.flush();
       UO.Debug(e);
     }
     finally
