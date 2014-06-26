@@ -25,6 +25,7 @@ public class KeyWords
   public static final String X_AXIS_NAME            =   "x_axis_name";
   public static final String Y_AXIS_NAME            =   "y_axis_name";
   public static final String ENABLE_LINES           =   "enable_lines";
+  public static final String LINE_WIDTH             =   "line_width";
   public static final String ENABLE_SHAPES          =   "enable_shapes";
   public static final String ENABLE_AUTOSCALE       =   "enable_autoscale";
   public static final String MIN_SCALE_VALUE        =   "min_scale_value";

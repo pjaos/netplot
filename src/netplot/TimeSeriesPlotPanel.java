@@ -21,6 +21,7 @@ import java.util.*;
 
 public class TimeSeriesPlotPanel extends GenericPlotPanel implements PlotPanelInterface
 {
+  static final long serialVersionUID=7;
   private JFreeChart                    chart;
   private Vector<TimeSeries>            timeSeriesList;
   

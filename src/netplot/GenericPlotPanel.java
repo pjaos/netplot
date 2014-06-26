@@ -6,34 +6,39 @@
 
 package netplot;
 
-import javax.swing.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.LayoutManager;
+
+import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.ValueAxis;
-import java.awt.*;
-
+import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.util.LogFormat;
 import org.jfree.data.Range;
-import org.jfree.chart.renderer.xy.*;
-import org.jfree.chart.axis.NumberTickUnit;
-import org.jfree.chart.labels.*;
 
-public class GenericPlotPanel extends JPanel 
+public class GenericPlotPanel extends JPanel
 {
+  static final long serialVersionUID=3;
+  static final int DEFAULT_LINE_WIDTH=1;
   public static Color       PlotColours[] = {Color.blue, Color.black, Color.red, Color.green, Color.cyan, Color.darkGray, Color.gray, Color.lightGray, Color.magenta, Color.orange, Color.pink, Color.yellow };
 
-  //Plot attributes 
+  //Plot attributes
   //Not all plot types may use all the attributes. See the specific plot planel for details
   String    plotTitle="";
   String    plotName="";
   String    xAxisName="";
   String    yAxisName="";
   boolean   linesEnabled=true;
+  int       lineWidth=GenericPlotPanel.DEFAULT_LINE_WIDTH;
   boolean   shapesEnabled=true;
   boolean   autoScaleEnabled=true;
   double    minScaleValue=0;
@@ -44,15 +49,16 @@ public class GenericPlotPanel extends JPanel
   boolean   zeroOnYScale=false;
   boolean   enableLegend=true;
   int       yAxisTickCount=0;
-  
+
   int yAxisIndex=0;
-  
+
   public GenericPlotPanel(LayoutManager layoutManager)
   {
     super(layoutManager);
   }
-  
-  public String toString()
+
+  @Override
+public String toString()
   {
     StringBuffer strBuffer = new StringBuffer();
     strBuffer.append("plotTitle        = "+plotTitle+"\n");
@@ -68,7 +74,7 @@ public class GenericPlotPanel extends JPanel
     strBuffer.append("logYAxis         = "+logYAxis+"\n");
     return strBuffer.toString();
   }
-  
+
   public void setAttribute(String name, String value) throws NetPlotException
   {
     if( name == null || value == null || name.length() == 0 )
@@ -146,7 +152,7 @@ public class GenericPlotPanel extends JPanel
       {
         throw new NetPlotException(value+" is an invalid value for "+KeyWords.MIN_SCALE_VALUE+", must be a double value");
       }
-    }    
+    }
     else if( name.equals(KeyWords.MAX_SCALE_VALUE) )
     {
       try
@@ -157,7 +163,7 @@ public class GenericPlotPanel extends JPanel
       {
         throw new NetPlotException(value+" is an invalid value for "+KeyWords.MAX_SCALE_VALUE+", must be a double value");
       }
-    }    
+    }
     else if( name.equals(KeyWords.MAX_AGE_SECONDS) )
     {
       try
@@ -168,7 +174,7 @@ public class GenericPlotPanel extends JPanel
       {
         throw new NetPlotException(value+" is an invalid value for "+KeyWords.MAX_AGE_SECONDS+", must be a integer value");
       }
-    }    
+    }
     else if( name.equals(KeyWords.ENABLE_LOG_Y_AXIS) )
     {
       if( value.equals("true") )
@@ -239,19 +245,34 @@ public class GenericPlotPanel extends JPanel
       {
         throw new NetPlotException(value+" is an invalid value for "+KeyWords.TICK_COUNT+", must be a integer value");
       }
-    }    
+    }
+    else if( name.equals(KeyWords.LINE_WIDTH) )
+    {
+      try
+      {
+        lineWidth=Integer.parseInt(value);
+        if( lineWidth < 1 ) {
+        	throw new NumberFormatException();
+        }
+      }
+      catch(NumberFormatException e)
+      {
+        throw new NetPlotException(value+" is an invalid value for "+KeyWords.LINE_WIDTH+", must be a int value in pixels");
+      }
+    }
     else
     {
-      throw new NetPlotException(name+" is an unknown attribute (value="+value);      
+      throw new NetPlotException(name+" is an unknown attribute (value="+value);
     }
   }
-  
-  void genericConfig(JFreeChart chart, XYPlot plot, int plotIndex)
+
+void genericConfig(JFreeChart chart, XYPlot plot, int plotIndex)
   {
     if( !enableLegend )
     {
       chart.removeLegend();
     }
+
     XYItemRenderer xyItemRenderer = plot.getRenderer();
     //May also be XYBarRenderer
     if( xyItemRenderer instanceof XYLineAndShapeRenderer ) {
@@ -260,17 +281,16 @@ public class GenericPlotPanel extends JPanel
       XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(linesEnabled, shapesEnabled);
       //Ensure we don't loose the tool tips on the new renderer
       renderer.setBaseToolTipGenerator(xyToolTipGenerator);
-      renderer.setSeriesPaint(0, getPlotColour(plotIndex) );
-      renderer.setSeriesStroke(plotIndex, new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-      ((XYPlot)chart.getPlot()).setRenderer(plotIndex, renderer);
-
+      renderer.setBasePaint( getPlotColour(plotIndex) );
+       renderer.setSeriesStroke(0, new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL), true);
+      plot.setRenderer(plotIndex, renderer);
     }
-    
+
     //If we have a new y axis then we need a new data set
     if( yAxisName != null && yAxisName.length() >  0 )
-    {    
+    {
       if( logYAxis ) {
-        LogAxis yAxis = new LogAxis(yAxisName);  
+        LogAxis yAxis = new LogAxis(yAxisName);
         yAxis.setAutoRange(false);
         yAxis.setNumberFormatOverride(new LogFormat(10, "10", true));
         yAxis.setRange(minScaleValue, maxScaleValue);
@@ -290,15 +310,15 @@ public class GenericPlotPanel extends JPanel
         {
           Range range = new Range(minScaleValue, maxScaleValue);
           axis.setRangeWithMargins(range, true, true);
-        }     
+        }
         if ( yAxisTickCount > 0 ) {
           NumberTickUnit tick = new NumberTickUnit(yAxisTickCount);
-          axis.setTickUnit(tick);        
+          axis.setTickUnit(tick);
         }
         plot.setRangeAxis(yAxisIndex, axis);
         plot.setRangeAxisLocation(yAxisIndex, AxisLocation.BOTTOM_OR_LEFT);
       }
-      yAxisIndex++;    
+      yAxisIndex++;
     }
     plot.mapDatasetToRangeAxis(plotIndex,yAxisIndex-1);
     ValueAxis a = plot.getDomainAxis();
@@ -312,7 +332,7 @@ public class GenericPlotPanel extends JPanel
       ((NumberAxis)a).setAutoRangeIncludesZero(zeroOnXScale);
     }
   }
-  
+
   Color getPlotColour(int plotIndex)
   {
     int colourIndex;

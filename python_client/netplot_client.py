@@ -12,22 +12,23 @@ import types
 
 VALID_PLOT_TYPES=['time','bar','xy', 'dial']
 
-PLOT_TITLE		= "plot_title"
-PLOT_NAME		= "plot_name"
-X_AXIS_NAME		= "x_axis_name"
-Y_AXIS_NAME		= "y_axis_name"
-ENABLE_LINES		= "enable_lines"
-ENABLE_SHAPES		= "enable_shapes"
-ENABLE_AUTOSCALE	= "enable_autoscale"
-MIN_SCALE_VALUE		= "min_scale_value"
-MAX_SCALE_VALUE		= "max_scale_value"
-MAX_AGE_SECONDS		= "max_age_seconds"
-ENABLE_LOG_Y_AXIS	= "enable_log_y_axis"
+PLOT_TITLE				= "plot_title"
+PLOT_NAME				= "plot_name"
+X_AXIS_NAME				= "x_axis_name"
+Y_AXIS_NAME				= "y_axis_name"
+ENABLE_LINES			= "enable_lines"
+ENABLE_SHAPES			= "enable_shapes"
+ENABLE_AUTOSCALE		= "enable_autoscale"
+MIN_SCALE_VALUE			= "min_scale_value"
+MAX_SCALE_VALUE			= "max_scale_value"
+MAX_AGE_SECONDS			= "max_age_seconds"
+ENABLE_LOG_Y_AXIS		= "enable_log_y_axis"
 ENABLE_ZERO_ON_X_SCALE  = "enable_zero_on_x_scale"
 ENABLE_ZERO_ON_Y_SCALE  = "enable_zero_on_y_scale"
-FRAME_TITLE		= "frame_title"
-ENABLE_LEGEND		= "enable_legend"
-TICK_COUNT 		= "tick_count"
+FRAME_TITLE				= "frame_title"
+ENABLE_LEGEND			= "enable_legend"
+TICK_COUNT 				= "tick_count"
+LINE_WIDTH      		= "line_width"
 
 class NetPlotError(Exception):
   pass
@@ -38,6 +39,7 @@ class PlotConfig:
     self.xAxisName=""
     self.yAxisName=""
     self.enableLines=1
+    self.lineWidth=1
     self.enableShapes=1
     self.enableAutoScale=1
     self.minScaleValue=0
@@ -166,6 +168,8 @@ class NetPlot:
         if plotConfig.enableLines:
           varValue="true"
         self.sendCmd("set %s=%s" % (ENABLE_LINES,varValue) )
+      if plotConfig.lineWidth > 0:
+        self.sendCmd( "set %s=%s" % (LINE_WIDTH, str(plotConfig.lineWidth) ) )
       if plotConfig.enableShapes != None:
         varValue="false"
         if plotConfig.enableShapes:

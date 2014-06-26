@@ -41,6 +41,7 @@ struct _plot_config
     char            yAxisName[MAX_STR_LEN];
     unsigned char   enableLines;
     unsigned char   enableShapes;
+    int             lineWidth;
     unsigned char   enableAutoScale;
     unsigned char   enableLogYAxis;
     unsigned char   enableZeroOnXAxis;

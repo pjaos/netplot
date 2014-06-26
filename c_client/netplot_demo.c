@@ -172,6 +172,7 @@ static void time_example_3(int server_connection_index)
     strncpy(pc.xAxisName, "The X axis", MAX_STR_LEN);
     strncpy(pc.yAxisName, "The Y axis (Plot0)", MAX_STR_LEN);
     pc.enableLines=1;
+    pc.lineWidth=4;
     pc.enableShapes=1;
     pc.enableAutoScale=1;
     pc.maxAgeSeconds=5;
@@ -179,6 +180,7 @@ static void time_example_3(int server_connection_index)
     netplot_set_plot_type(server_connection_index, PLOT_TYPE_TIME, "TIME chart, two traces with different linear Y scales, both autoscaled");
     netplot_add_plot(server_connection_index, pc);
 
+    pc.lineWidth=7;
     strncpy(pc.yAxisName, "The Y axis (Plot1)", MAX_STR_LEN);
     netplot_add_plot(server_connection_index, pc);
 
@@ -299,7 +301,7 @@ static void xy_example1(int server_connection_index)
     memset(&pc0, 0 , sizeof(pc0) );
     memset(&pc1, 0 , sizeof(pc1) );
 
-    load_default_plotConfig(&pc1);
+    load_default_plotConfig(&pc0);
     strncpy(pc0.plotName, "Plot 0", MAX_STR_LEN);
     strncpy(pc0.xAxisName, "The X axis name", MAX_STR_LEN);
     strncpy(pc0.yAxisName, "The Y axis (Plot0)", MAX_STR_LEN);
@@ -572,6 +574,7 @@ int main(int argc, char *argv[])
     time_example_4(3);
     bar_example(4);
     xy_example1(5);
+
     xy_example2(6);
     xy_example3(7);
     show_dial_example(8);

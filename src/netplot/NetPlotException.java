@@ -8,6 +8,7 @@ package netplot;
 
 public class NetPlotException extends Exception
 {
+  static final long serialVersionUID=4;
   public NetPlotException(String message)
   {
     super(message);

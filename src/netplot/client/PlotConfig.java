@@ -15,6 +15,7 @@ public class PlotConfig
   public String     xAxisName="";
   public String     yAxisName="";
   public boolean    enableLines=true;
+  public int		lineWidth=1;
   public boolean    enableShapes=true;
   public boolean    enableAutoScale=true;
   public double     minScaleValue=0;

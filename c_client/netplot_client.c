@@ -385,6 +385,7 @@ void load_default_plotConfig(struct _plot_config *plot_config)
     strncpy(plot_config->xAxisName,"", MAX_STR_LEN);
     strncpy(plot_config->yAxisName,"", MAX_STR_LEN);
     plot_config->enableLines=1;
+    plot_config->lineWidth=1;
     plot_config->enableShapes=1;
     plot_config->enableAutoScale=1;
     plot_config->minScaleValue=0;
@@ -695,6 +696,15 @@ int netplot_add_plot(int server_connection_index, struct _plot_config pc)
             strncpy(buffer, "set enable_lines=false\n", CMD_BUFFER_SIZE);
         }
         rc = send_command_expect_ok(server_connection_index, buffer);
+    }
+    if( rc == 0 )
+    {
+        memset(buffer, 0 , CMD_BUFFER_SIZE);
+        if( pc.lineWidth > 0 )
+        {
+            snprintf(buffer, CMD_BUFFER_SIZE, "set line_width=%d\n", pc.lineWidth);
+            rc = send_command_expect_ok(server_connection_index, buffer);
+        }
     }
     if( rc == 0 )
     {

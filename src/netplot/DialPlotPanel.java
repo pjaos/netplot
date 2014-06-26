@@ -35,6 +35,7 @@ import org.jfree.ui.StandardGradientPaintTransformer;
  */
 public class DialPlotPanel extends GenericPlotPanel  implements PlotPanelInterface
 {
+  static final long serialVersionUID=2;
   public static final Color  Plot0Color = Color.BLUE;
   public static final Color  Plot1Color = Color.RED;
   
