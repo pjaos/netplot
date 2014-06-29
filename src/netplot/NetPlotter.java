@@ -25,6 +25,8 @@ import javax.swing.*;
 public class NetPlotter
 {
   public static final String SERVER_PORT="SERVER_PORT";
+  public static final String NetPlotterPersistentConfigFile = "NetPlotterPersistentConfigFile";
+  public static PersistentConfig PersistentConfig = new PersistentConfig();
   private File configFile = new File(System.getProperty("user.home"), ".NetPlotter.cfg");
   private Properties configProperties = new Properties();
 

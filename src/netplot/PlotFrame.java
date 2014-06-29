@@ -19,12 +19,20 @@ import javax.swing.JScrollPane;
 /*
  * Change log
  *
+ * 2.0
+ * - Don't resize frame/window (call pack() on frame) when the client sets the grid 
+ *   dimensions as it is unwanted behaviour. 
+ * - When closed the position and size of the window is saved. When restarted the 
+ *   last position and size of the window is restored.
+ * - Split the Netplot client demo out into separate Java src file in order to 
+ *   improve clarity of code.
+ *   
  * 1.9
  * - Maximising the frame is painful to use. Revert to previous approach.
  *
  * 1.8
  * - Enable auto flush on PrintWriter back to client in order to improve plot speed.
- * - When starting up Netplot frame startup maximized.
+ * - When starting up Netplot frame startup maximised.
  *
  * 1.7
  * - Add ability to set the thickness of the plot lines to netplot. Updated all
@@ -93,7 +101,7 @@ import javax.swing.JScrollPane;
 public class PlotFrame extends JFrame
 {
   static final long serialVersionUID=5;
-  public static final double NETPLOT_VERSION=1.9;
+  public static final double NETPLOT_VERSION=2.0;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",
@@ -239,10 +247,29 @@ public class PlotFrame extends JFrame
     JScrollPane jScrollPane = new JScrollPane(chartPanel);
     jScrollPane.setPreferredSize( new Dimension(1024,768));
     mainPanel.add(jScrollPane,BorderLayout.CENTER);
-    pack();
-
     setChartLayout(1,1);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    
+    try {
+    	NetPlotter.PersistentConfig.load(NetPlotter.NetPlotterPersistentConfigFile);
+    	//Set the location of the window when previously shutdown
+    	//But protect from being moved off the screen
+    	if( NetPlotter.PersistentConfig.guiXPos < 0 ) {
+    		NetPlotter.PersistentConfig.guiXPos=0;
+    	}    	
+    	if( NetPlotter.PersistentConfig.guiYPos < 0 ) {
+    		NetPlotter.PersistentConfig.guiYPos=0;
+    	}
+    	setLocation(NetPlotter.PersistentConfig.guiXPos, NetPlotter.PersistentConfig.guiYPos);
+    	setSize(NetPlotter.PersistentConfig.guiWidth, NetPlotter.PersistentConfig.guiHeight);
+    }
+    catch(Exception e) {
+        mainPanel.add(jScrollPane,BorderLayout.CENTER);
+        pack();    	
+    }
+    ShutDownHandler shutDownHandler = new ShutDownHandler(this);
+    Runtime.getRuntime().addShutdownHook(shutDownHandler);
+    
   }
 
   public void addPanel(Component panel, int index)
@@ -269,7 +296,6 @@ public class PlotFrame extends JFrame
   {
     removeAllPanels();
     chartPanel.setLayout( new GridLayout(rows,columns) );
-    pack();
   }
 
   public static void main(String args[])
