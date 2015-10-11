@@ -8,7 +8,6 @@
 
 import socket
 import types
-import types
 import time
 
 VALID_PLOT_TYPES=['time','bar','xy', 'dial']
