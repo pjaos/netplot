@@ -12,6 +12,8 @@ import time
 
 VALID_PLOT_TYPES=['time','bar','xy', 'dial']
 
+DEFAULT_NETPLOT_BASE_PORT = 9600
+
 PLOT_TITLE				= "plot_title"
 PLOT_NAME				= "plot_name"
 X_AXIS_NAME				= "x_axis_name"
