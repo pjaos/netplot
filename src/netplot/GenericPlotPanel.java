@@ -24,6 +24,7 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.util.LogFormat;
 import org.jfree.data.Range;
+import org.jfree.chart.axis.LogarithmicAxis;
 
 public class GenericPlotPanel extends JPanel
 {
@@ -290,14 +291,17 @@ void genericConfig(JFreeChart chart, XYPlot plot, int plotIndex)
     if( yAxisName != null && yAxisName.length() >  0 )
     {
       if( logYAxis ) {
-        LogAxis yAxis = new LogAxis(yAxisName);
+
+        LogarithmicAxis yAxis = new LogarithmicAxis("");
         yAxis.setAutoRange(false);
         yAxis.setNumberFormatOverride(new LogFormat(10, "10", true));
         yAxis.setRange(minScaleValue, maxScaleValue);
         yAxis.setLowerBound(minScaleValue);
         yAxis.setUpperBound(maxScaleValue);
+        yAxis.setLog10TickLabelsFlag(true);
         plot.setRangeAxis(yAxisIndex, yAxis);
         plot.setRangeAxisLocation(yAxisIndex, AxisLocation.BOTTOM_OR_LEFT);
+
       }
       else {
         NumberAxis axis = new NumberAxis(yAxisName);

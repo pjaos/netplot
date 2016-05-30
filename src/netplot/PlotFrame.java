@@ -19,6 +19,10 @@ import javax.swing.JScrollPane;
 /*
  * Change log
  *
+ * 2.1
+ * - Fixed build of Java demo client. Previously it would not run.
+ * - Log plot now shows log values correctly.
+ * 
  * 2.0
  * - Don't resize frame/window (call pack() on frame) when the client sets the grid 
  *   dimensions as it is unwanted behaviour. 
@@ -101,7 +105,7 @@ import javax.swing.JScrollPane;
 public class PlotFrame extends JFrame
 {
   static final long serialVersionUID=5;
-  public static final double NETPLOT_VERSION=2.0;
+  public static final double NETPLOT_VERSION=2.1;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",
