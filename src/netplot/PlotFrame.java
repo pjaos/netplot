@@ -14,11 +14,28 @@ import java.awt.GridLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JFileChooser;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.Container;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 /*
  * Change log
  *
+ * 2.3
+ * - Add menu option to save all plots on a grid as a png file.
+ * 
  * 2.2
  * - Previous fix, stopped showing the log axis name, if set. Fixed.
  *
@@ -105,10 +122,10 @@ import javax.swing.JScrollPane;
  * This status bar may be double clicked to get the help text
  * for commands that may be used to plot data.
  */
-public class PlotFrame extends JFrame
+public class PlotFrame extends JFrame implements ActionListener
 {
   static final long serialVersionUID=5;
-  public static final double NETPLOT_VERSION=2.2;
+  public static final double NETPLOT_VERSION=2.3;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",
@@ -240,7 +257,11 @@ public class PlotFrame extends JFrame
   private final JPanel mainPanel = new JPanel( new BorderLayout() );
   private final JPanel chartPanel = new JPanel();
   private boolean showStatusMessages=true;
-
+  private JMenuBar menuBar;
+  private JMenu fileMenu;
+  private JMenuItem savePlotsMenuItem;
+  private JFileChooser saveImageJFC = new JFileChooser();
+  
   public PlotFrame()
   {
     statusBar = new StatusBar();
@@ -256,6 +277,17 @@ public class PlotFrame extends JFrame
     mainPanel.add(jScrollPane,BorderLayout.CENTER);
     setChartLayout(1,1);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    menuBar = new JMenuBar();
+    fileMenu = new JMenu("File");
+    fileMenu.setMnemonic(KeyEvent.VK_F);
+    menuBar.add(fileMenu);
+    savePlotsMenuItem = new JMenuItem("Save Image", KeyEvent.VK_S);
+    savePlotsMenuItem.getAccessibleContext().setAccessibleDescription("Save plots as an image file");
+    fileMenu.add(savePlotsMenuItem);
+    setJMenuBar(menuBar);
+    savePlotsMenuItem.addActionListener(this);
+    saveImageJFC.setToolTipText("Save window to a PNG image file.");
     
     try {
     	NetPlotter.PersistentConfig.load(NetPlotter.NetPlotterPersistentConfigFile);
@@ -350,4 +382,36 @@ public class PlotFrame extends JFrame
   public void SetEnableStatusMessages(boolean enabled) {
     showStatusMessages=enabled;
   }
+
+  @Override
+  /**
+   * @brief Process menu selection events
+   */
+  public void actionPerformed(ActionEvent e) {
+
+	  if( e.getSource() == savePlotsMenuItem ) {
+		  captureFrame();
+	  }
+	  
+  }
+  
+  /**
+   * @brief Capture all plots to a png file.
+   */
+  private void captureFrame() {
+      
+      try {
+    	  int retVal = saveImageJFC.showSaveDialog(null);
+    	  if(retVal==JFileChooser.APPROVE_OPTION){
+	          Container c = getContentPane();
+	          BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB);
+	          c.paint(im.getGraphics());
+	          ImageIO.write(im, "PNG", saveImageJFC.getSelectedFile());
+    	  }
+           
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
+  }
+
 }
