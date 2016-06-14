@@ -18,6 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -32,6 +33,10 @@ import javax.imageio.ImageIO;
 
 /*
  * Change log
+ *
+ * 2.4
+ * - Allow plot images bigger than the screen size to be saved.
+ * - Allow plot images to be GIF or PNG files.
  *
  * 2.3
  * - Add menu option to save all plots on a grid as a png file.
@@ -125,7 +130,7 @@ import javax.imageio.ImageIO;
 public class PlotFrame extends JFrame implements ActionListener
 {
   static final long serialVersionUID=5;
-  public static final double NETPLOT_VERSION=2.3;
+  public static final double NETPLOT_VERSION=2.4;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",
@@ -402,12 +407,34 @@ public class PlotFrame extends JFrame implements ActionListener
       
       try {
     	  int retVal = saveImageJFC.showSaveDialog(null);
-    	  if(retVal==JFileChooser.APPROVE_OPTION){
-	          Container c = getContentPane();
-	          BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB);
-	          c.paint(im.getGraphics());
-	          ImageIO.write(im, "PNG", saveImageJFC.getSelectedFile());
+		  int width  = chartPanel.getWidth();
+		  int height = chartPanel.getHeight();
+		  
+		  if( height > 0  && height > 0 ) {
+			  
+			  if(retVal==JFileChooser.APPROVE_OPTION){
+		          BufferedImage im = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		          chartPanel.paint(im.getGraphics());
+		          String filename = saveImageJFC.getSelectedFile().getAbsolutePath();
+		          
+		          String fileSuffix = "";
+		          if( filename.toLowerCase().endsWith(".gif") ) {
+		        	  fileSuffix="GIF";
+		          } else if( filename.toLowerCase().endsWith(".png") ) {
+		        	  fileSuffix="PNG";
+		          }
+		          
+		          if( fileSuffix.length() > 0 ) {
+		        	  ImageIO.write(im, fileSuffix, saveImageJFC.getSelectedFile());
+		          }
+		          else {
+		        	  JOptionPane.showMessageDialog(this, "Error", "Invalid image file type. File extension must be gif or png.", JOptionPane.ERROR_MESSAGE);
+		          }
+    		  }
     	  }
+		  else {
+        	  JOptionPane.showMessageDialog(this, "Error", "Plot window to small to save as an image.", JOptionPane.ERROR_MESSAGE);			  
+		  }
            
       } catch (IOException e) {
           e.printStackTrace();
