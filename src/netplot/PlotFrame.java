@@ -428,12 +428,12 @@ public class PlotFrame extends JFrame implements ActionListener
 		        	  ImageIO.write(im, fileSuffix, saveImageJFC.getSelectedFile());
 		          }
 		          else {
-		        	  JOptionPane.showMessageDialog(this, "Error", "Invalid image file type. File extension must be gif or png.", JOptionPane.ERROR_MESSAGE);
+		        	  JOptionPane.showMessageDialog(this, "Invalid image file type. File extension must be gif or png.", "Error", JOptionPane.ERROR_MESSAGE);
 		          }
     		  }
     	  }
 		  else {
-        	  JOptionPane.showMessageDialog(this, "Error", "Plot window to small to save as an image.", JOptionPane.ERROR_MESSAGE);			  
+        	  JOptionPane.showMessageDialog(this, "Plot window to small to save as an image.", "Error", JOptionPane.ERROR_MESSAGE);			  
 		  }
            
       } catch (IOException e) {
