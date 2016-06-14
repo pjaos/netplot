@@ -19,6 +19,9 @@ import javax.swing.JScrollPane;
 /*
  * Change log
  *
+ * 2.2
+ * - Previous fix, stopped showing the log axis name, if set. Fixed.
+ *
  * 2.1
  * - Fixed build of Java demo client. Previously it would not run.
  * - Log plot now shows log values correctly.
@@ -105,7 +108,7 @@ import javax.swing.JScrollPane;
 public class PlotFrame extends JFrame
 {
   static final long serialVersionUID=5;
-  public static final double NETPLOT_VERSION=2.1;
+  public static final double NETPLOT_VERSION=2.2;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",

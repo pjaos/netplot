@@ -292,7 +292,7 @@ void genericConfig(JFreeChart chart, XYPlot plot, int plotIndex)
     {
       if( logYAxis ) {
 
-        LogarithmicAxis yAxis = new LogarithmicAxis("");
+        LogarithmicAxis yAxis = new LogarithmicAxis(yAxisName);
         yAxis.setAutoRange(false);
         yAxis.setNumberFormatOverride(new LogFormat(10, "10", true));
         yAxis.setRange(minScaleValue, maxScaleValue);
