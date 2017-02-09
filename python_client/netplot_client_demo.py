@@ -14,7 +14,7 @@ import random
 from math import sin, cos, tan
 from netplot_client import PlotConfig, NetPlot, NetPlotError
 
-def timeExample1(netPlot):
+def timeExample1(netPlot, plotNumber):
   """Single plot on a time series chart"""
   plotConfig = PlotConfig()
   plotConfig.plotName="Plot 0"
@@ -28,7 +28,7 @@ def timeExample1(netPlot):
   plotConfig.maxAgeSeconds=5  
   plotConfig.tickCount=1000
   
-  netPlot.setPlotType('time', title="TIME chart, single plot")
+  netPlot.setPlotType('time', title="%d: TIME chart, single plot" % (plotNumber) )
   #Uncomment this to remove the Legend on the chart
   #netPlot.setChartLegendEnabled(0)
   netPlot.addPlot(plotConfig)
@@ -37,7 +37,7 @@ def timeExample1(netPlot):
     netPlot.addPlotValues([random.randint(1000,10000)])
     i=i+1
       
-def timeExample2(netPlot, timePeriod=0.01):
+def timeExample2(netPlot, plotNumber, timePeriod=0.01):
   """Three plots on a time series chart with the same Y axis."""
   plotConfig = PlotConfig()
   plotConfig.xAxisName="The X axis"
@@ -48,7 +48,7 @@ def timeExample2(netPlot, timePeriod=0.01):
   plotConfig.minScaleValue=-5
   plotConfig.maxScaleValue=5
   
-  netPlot.setPlotType('time', title="TIME chart, multiple plots, same Y scale")
+  netPlot.setPlotType('time', title="%d: TIME chart, multiple plots, same Y scale" % (plotNumber) )
   #Uncomment this to remove the Legend on the chart
   #netPlot.setChartLegendEnabled(0)
   
@@ -65,23 +65,21 @@ def timeExample2(netPlot, timePeriod=0.01):
     x=x+0.1
     time.sleep(timePeriod)
 
-def timeExample3(netPlot):
+def timeExample3(netPlot, plotNumber):
   """Two plots on a time series chart with different Y axis"""
   plotConfig = PlotConfig()
   plotConfig.plotName="Plot 0"
   plotConfig.xAxisName="The X axis"
   plotConfig.yAxisName="Y axis (Plot0)"
   plotConfig.enableLines=1
-  plotConfig.lineWidth=4
   plotConfig.enableShapes=1
   plotConfig.enableAutoScale=1
   #plotConfig.minScaleValue=0
   #plotConfig.maxScaleValue=10000
   plotConfig.maxAgeSeconds=5
-  netPlot.setPlotType('time', title="TIME chart, two traces with different linear Y scales, both autoscaled")
+  netPlot.setPlotType('time', title="%d: TIME chart, two traces with different linear Y scales, both autoscaled" % (plotNumber) )
   netPlot.addPlot(plotConfig)  
   plotConfig.plotName="Plot 1"
-  plotConfig.lineWidth=7
   #Add a new Y Axis
   plotConfig.yAxisName="Y Axis (Plot1)"
   netPlot.addPlot(plotConfig)  
@@ -89,8 +87,34 @@ def timeExample3(netPlot):
   while i<10:
     netPlot.addPlotValues([random.randint(1000,10000),random.randint(10,100)])
     i=i+1
+
+def timeExample4(netPlot, plotNumber):
+  """Time series chart passing the time (from Netplot.GetTimeNowString()) and the y value"""
+  plotConfig = PlotConfig()
+  plotConfig.plotName="Plot 0"
+  plotConfig.xAxisName="The X axis"
+  plotConfig.yAxisName="Y axis (Plot0)"
+  plotConfig.enableLines=1
+  plotConfig.enableShapes=1
+  plotConfig.enableAutoScale=1
+  plotConfig.maxAgeSeconds=5
+  netPlot.setPlotType('time', title="%d: TIME chart using Netplot.GetTimeNowString()." % (plotNumber) )
+  netPlot.addPlot(plotConfig)  
+  plotConfig.plotName="Plot 1"
+  #Add a new Y Axis
+  plotConfig.yAxisName="Y Axis (Plot1)"
+  netPlot.addPlot(plotConfig)  
   
-def timeExample5(netPlot):
+  #Update first plot
+  i=0
+  while i<10:    
+    netPlot.addTimePlotValue(0, NetPlot.GetTimeNowString(), float(1.395*random.randint(0,10) ) )
+    i=i+1
+    time.sleep(0.1)
+
+  netPlot.update()
+  
+def timeExample5(netPlot, plotNumber):
   """Time series chart passing the time and the y value"""
   plotConfig = PlotConfig()
   plotConfig.plotName="Plot 0"
@@ -100,7 +124,7 @@ def timeExample5(netPlot):
   plotConfig.enableShapes=1
   plotConfig.enableAutoScale=1
   plotConfig.maxAgeSeconds=5
-  netPlot.setPlotType('time', title="TIME chart, passing the time and the y value (cached).")
+  netPlot.setPlotType('time', title="%d: TIME chart, passing the time and the y value (cached)." % (plotNumber) )
   netPlot.addPlot(plotConfig)  
   plotConfig.plotName="Plot 1"
   #Add a new Y Axis
@@ -132,7 +156,7 @@ def timeExample5(netPlot):
   netPlot.update()
 
     
-def barExample(netPlot):
+def barExample(netPlot, plotNumber):
   """Bar chart example"""
   plotConfig0 = PlotConfig()
   plotConfig0.plotName="Plot 0"
@@ -142,14 +166,14 @@ def barExample(netPlot):
   #plotConfig0.minScaleValue=1
   #plotConfig0.maxScaleValue=10000
   #log axis not currently supported on Bar charts    
-  netPlot.setPlotType('bar', title="BAR chart")
+  netPlot.setPlotType('bar', title="%d: BAR chart" % (plotNumber))
   netPlot.addPlot(plotConfig0)
   i=0
   while i<10:
     netPlot.addPlotValues([random.randint(1000,10000)])
     i=i+1
 
-def xyExample1(netPlot):
+def xyExample1(netPlot, plotNumber):
   """two plots with different linear Y scales"""
   plotConfig0 = PlotConfig()
   plotConfig0.plotName="Plot 0"
@@ -160,7 +184,7 @@ def xyExample1(netPlot):
   plotConfig0.enableAutoScale=1
   plotConfig0.enableZeroOnXAxis=0
   plotConfig0.enableZeroOnYAxis=0
-  netPlot.setPlotType('xy', title="XY chart, two traces with different linear Y scales, both autoscaled")     
+  netPlot.setPlotType('xy', title="%d: XY chart, two traces with different linear Y scales, both autoscaled" % (plotNumber) )     
   netPlot.addPlot(plotConfig0)   
   
   plotConfig1 = PlotConfig()
@@ -178,7 +202,7 @@ def xyExample1(netPlot):
     netPlot.addXYPlotValues(1,random.randint(-60,-50), random.randint(75,80))
     i=i+1
   
-def xyExample2(netPlot):
+def xyExample2(netPlot, plotNumber):
   """XY plot with log Y scale"""
   plotConfig0 = PlotConfig()
   plotConfig0.plotName="Plot 0"
@@ -189,7 +213,7 @@ def xyExample2(netPlot):
   plotConfig0.enableLogYAxis=1
   plotConfig0.minScaleValue=1E-10
   plotConfig0.maxScaleValue=1E-2
-  netPlot.setPlotType('xy', title="XY chart with log Y scale")
+  netPlot.setPlotType('xy', title="%d: XY chart with log Y scale" % (plotNumber) )
   netPlot.addPlot(plotConfig0)
   netPlot.addXYPlotValues(0,-50, 1E-9)
   netPlot.addXYPlotValues(0,-55, 1E-7)
@@ -198,7 +222,7 @@ def xyExample2(netPlot):
   netPlot.addXYPlotValues(0,-80, 1E-4)
   netPlot.addXYPlotValues(0,-90, 1E-3)
 
-def xyExample3(netPlot):
+def xyExample3(netPlot, plotNumber):
   """XY chart with 2 lin and 2 log Y scales"""
   plotConfig0 = PlotConfig()
   plotConfig0.plotName="Plot 0"
@@ -209,7 +233,7 @@ def xyExample3(netPlot):
   plotConfig0.enableLogYAxis=1
   plotConfig0.minScaleValue=1E-10
   plotConfig0.maxScaleValue=1E-2
-  netPlot.setPlotType('xy', title="XY chart with 2 lin and 2 log Y scales")
+  netPlot.setPlotType('xy', title="%d: XY chart with 2 lin and 2 log Y scales" % (plotNumber) )
   netPlot.addPlot(plotConfig0)  
   
   plotConfig1 = PlotConfig()
@@ -270,9 +294,9 @@ def xyExample3(netPlot):
   netPlot.addXYPlotValues(3,5, 1E-4)
   netPlot.addXYPlotValues(3,6, 1E-3)
 
-def showDialExample(netPlot):
+def showDialExample(netPlot, plotNumber):
 	
-  netPlot.setPlotType('dial', title="Number and MAX")
+  netPlot.setPlotType('dial', title="%d: Number and MAX" % (plotNumber))
 
   plotConfig = PlotConfig()
   plotConfig.plotName="Number"
@@ -298,7 +322,7 @@ def showDialExample(netPlot):
     time.sleep(0.1)
     
     
-def cachedPlot(netPlot):
+def cachedPlot(netPlot, plotNumber):
   """XY plot with log Y scale but in this case we send the data for all the
      points to be plotted and then use the update command to plot them all
      quickly."""
@@ -312,7 +336,7 @@ def cachedPlot(netPlot):
   plotConfig0.minScaleValue=0
   plotConfig0.maxScaleValue=1
  
-  netPlot.setPlotType('xy', title="Cached, fast XY chart with log Y scale") 
+  netPlot.setPlotType('xy', title="%d: Cached, fast XY chart with log Y scale" % (plotNumber) ) 
   netPlot.addPlot(plotConfig0)
   
   #These must be called after the plot type is added
@@ -333,64 +357,71 @@ def cachedPlot(netPlot):
 def showAllExamples(address, initWindow, debug=0, port=9600):
   """Show all the example plots"""
   
-  netPlot0 = NetPlot(debug=False)          
-  netPlot0.connect(address, port)
-
-  print 'Netplot server version = %f' % (netPlot0.getServerVersion())
+  plotList = [1,2,3,4,5,6,7,8,9,10,11]
   
-  if initWindow:
-    #Set these non plot or chart specific parameters on first connection
-    netPlot0.setGrid(4,4)
-    netPlot0.setWindowTitle("Python netplot client demo")
-  
-  timeExample1(netPlot0)
-	
-  netPlot1 = NetPlot(debug=debug)          
-  netPlot1.connect(address, port+1)
-  timeExample2(netPlot1)
+  netPlotList = []
+  for plotNumber in plotList:
+      netPlot = NetPlot(debug=False)          
+      netPlot.connect(address, port)
+      
+      if len(netPlotList) == 0:
+          
+          if initWindow:
+            print 'Netplot server version = %f' % (netPlot.getServerVersion())
+            #Set these non plot or chart specific parameters on first connection
+            netPlot.setGrid(4,4)
+            netPlot.setWindowTitle("Python netplot client demo")
+      
+      netPlotList.append(netPlot)
+      
+      if plotNumber == 1:
 
-  netPlot2 = NetPlot(debug=debug)          
-  netPlot2.connect(address, port+2)
-  timeExample3(netPlot2)
+          timeExample1(netPlot, plotNumber)
+          
+      elif plotNumber == 2:
+          
+          timeExample2(netPlot, plotNumber)
+          
+      elif plotNumber == 3:
+      
+          timeExample3(netPlot, plotNumber)
+          
+      elif plotNumber == 4:
+      
+          timeExample4(netPlot, plotNumber)
+                
+      elif plotNumber == 5:
+      
+          timeExample5(netPlot, plotNumber)
+                      
+      elif plotNumber == 6:
 
-  netPlot3 = NetPlot(debug=debug)          
-  netPlot3.connect(address, port+3)
-  timeExample5(netPlot3)
+          barExample(netPlot, plotNumber)
 
-  netPlot4 = NetPlot(debug=debug)          
-  netPlot4.connect(address, port+4)
-  barExample(netPlot4)
-
-  netPlot5 = NetPlot(debug=debug)          
-  netPlot5.connect(address, port+5)
-  xyExample1(netPlot5)
-
-  netPlot6 = NetPlot(debug=debug)          
-  netPlot6.connect(address, port+6)
-  xyExample2(netPlot6)
-
-  netPlot7 = NetPlot(debug=debug)          
-  netPlot7.connect(address, port+7)
-  xyExample3(netPlot7)
-
-  netPlot8 = NetPlot(debug=debug)          
-  netPlot8.connect(address, port+8)
-  showDialExample(netPlot8)
-
-  netPlot9 = NetPlot(debug=debug)          
-  netPlot9.connect(address, port+9)
-  cachedPlot(netPlot9)
-
-  netPlot0.disconnect()
-  netPlot1.disconnect()
-  netPlot2.disconnect()
-  netPlot3.disconnect()
-  netPlot4.disconnect()
-  netPlot5.disconnect()
-  netPlot6.disconnect()
-  netPlot7.disconnect()
-  netPlot8.disconnect()
-  netPlot9.disconnect()
+      elif plotNumber == 7:
+          
+          xyExample1(netPlot, plotNumber)
+          
+      elif plotNumber == 8:
+      
+          xyExample2(netPlot, plotNumber)
+          
+      elif plotNumber == 9:
+          
+          xyExample3(netPlot, plotNumber)
+          
+      elif plotNumber == 10:
+      
+          showDialExample(netPlot, plotNumber)
+          
+      elif plotNumber == 11:
+      
+          cachedPlot(netPlot, plotNumber)
+          
+      port = port+1
+      
+  for netPlot in netPlotList:
+    netPlot.disconnect()
     
 def usage():
   """show program usage options"""

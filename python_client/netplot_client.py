@@ -8,11 +8,12 @@
 
 import socket
 import types
+import types
 import time
+from   datetime import datetime
+from   types import StringType
 
 VALID_PLOT_TYPES=['time','bar','xy', 'dial']
-
-DEFAULT_NETPLOT_BASE_PORT = 9600
 
 PLOT_TITLE				= "plot_title"
 PLOT_NAME				= "plot_name"
@@ -31,6 +32,8 @@ FRAME_TITLE				= "frame_title"
 ENABLE_LEGEND			= "enable_legend"
 TICK_COUNT 				= "tick_count"
 LINE_WIDTH      		= "line_width"
+
+DEFAULT_NETPLOT_PORT    = 9600
 
 class NetPlotError(Exception):
   pass
@@ -70,7 +73,19 @@ class NetPlot:
     self.__plotValueCache=[]    
     self.sock = None
 
-
+  @staticmethod
+  def GetTimeNowString():
+      """@brief This is a helper method which users can call to obtain a timestamp string that 
+                can be passed into addTimePlotValue() as the dateTimeObj when plotting time series graphs."""
+      dateTimeObj = datetime.now()    
+      return ""+str(dateTimeObj.year)+NetPlot.TIMESTAMP_DELIM+\
+                str(dateTimeObj.month)+NetPlot.TIMESTAMP_DELIM+\
+                str(dateTimeObj.day)+NetPlot.TIMESTAMP_DELIM+\
+                str(dateTimeObj.hour)+NetPlot.TIMESTAMP_DELIM+\
+                str(dateTimeObj.minute)+NetPlot.TIMESTAMP_DELIM+\
+                str(dateTimeObj.second)+NetPlot.TIMESTAMP_DELIM+\
+                str(dateTimeObj.microsecond/1000)
+                  
   def __debugPrint(self, message):
     """Display debug messages if required"""
     if self.__debug:
@@ -280,7 +295,11 @@ class NetPlot:
   def addTimePlotValue(self, plotIndex, dateTimeObj, plotValue):
     """The recommended way to send time series plot values where the time is passed from the 
        netplot client to the netplot server (GUI)."""
-    timeStampStr = self._getDateTimeString(dateTimeObj)
+    if isinstance(dateTimeObj , StringType):
+        timeStampStr = dateTimeObj
+    else:
+        timeStampStr = self._getDateTimeString(dateTimeObj)
+        
     cmdString="%d:%s:%s" % (plotIndex,timeStampStr, self.__getValue(plotValue))
     if self.__cacheEnabled:
       self.__plotValueCache.append(cmdString)
