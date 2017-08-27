@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "netplot installation complete."
+echo "The netplot and netplot_demo commands are now available."

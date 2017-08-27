@@ -1,0 +1,4 @@
+#!/bin/sh
+
+BASEDIR=$(dirname $0)
+cd $BASEDIR/netplot_files && java -jar netplot_gui.jar "$@"

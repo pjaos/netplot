@@ -1,0 +1,9 @@
+Package: netplot
+Section: graphics
+Priority: optional
+Architecture: all
+Essential: no
+Suggests: docbook 
+Installed-Size: 60000
+Maintainer: Paul Austen <pausten.os@gmail.com>
+Description: GUI for plotting number sequences.
