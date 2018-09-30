@@ -34,6 +34,10 @@ import javax.imageio.ImageIO;
 /*
  * Change log
  *
+ * 2.5
+ * - Use the latest jfreechart 1.0.19
+ * - Add check for the netplot baseport
+ *
  * 2.4
  * - Allow plot images bigger than the screen size to be saved.
  * - Allow plot images to be GIF or PNG files.
@@ -130,7 +134,7 @@ import javax.imageio.ImageIO;
 public class PlotFrame extends JFrame implements ActionListener
 {
   static final long serialVersionUID=5;
-  public static final double NETPLOT_VERSION=2.4;
+  public static final double NETPLOT_VERSION=2.5;
   String helpLines[] = {
       "* All netplot commands are text strings which makes the client code simple to implement.",
       "* Java and python clients are supplied by default but you may implement you own clients",
