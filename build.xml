@@ -14,13 +14,11 @@
         <pathelement location="bin"/>
         <pathelement location="jars/swtgraphics2d.jar"/>
         <pathelement location="jars/servlet.jar"/>
-        <pathelement location="jars/junit.jar"/>
-        <pathelement location="jars/jfreechart-1.0.14-swt.jar"/>
-        <pathelement location="jars/jfreechart-1.0.14-experimental.jar"/>
-        <pathelement location="jars/jfreechart-1.0.14.jar"/>
-        <pathelement location="jars/jcommon-1.0.17.jar"/>
-        <pathelement location="jars/iText-2.1.5.jar"/>
-        <pathelement location="jars/gnujaxp.jar"/>
+        <pathelement location="jars/junit-4.11.jar"/>
+        <pathelement location="jars/jfreechart-1.0.19-swt.jar"/>
+        <pathelement location="jars/jfreechart-1.0.19-experimental.jar"/>
+        <pathelement location="jars/jfreechart-1.0.19.jar"/>
+        <pathelement location="jars/jcommon-1.0.23.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>

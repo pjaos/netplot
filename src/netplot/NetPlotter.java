@@ -261,6 +261,19 @@ public class NetPlotter
     }
     UO.InitWindow();
     networkPlotter.setBasePort(basePort);
+    
+    //Check the basePort is available
+    try {
+        InetSocketAddress localAddress = new InetSocketAddress(basePort);
+        ServerSocket serverSocket = new ServerSocket();
+        serverSocket.bind(localAddress);
+        serverSocket.close();
+    }
+    catch(IOException e)
+    {
+        JOptionPane.showMessageDialog(null, "TCP port "+basePort+": "+e, "Error", JOptionPane.ERROR_MESSAGE);
+	System.exit(-1);
+    }
     networkPlotter.startServers();
   }
   
