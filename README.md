@@ -1,6 +1,6 @@
-== netplot ==
+# Netplot
 
-What is it
+## What is it
 
 Netplot is a tool for plotting values on a GUI from platforms with no GUI
 interface over a network connection. It was designed as tool that is 
@@ -9,7 +9,7 @@ Linux systems) when attempting to visualise data when debugging or
 attmpting to visualise internal state.
 
 
-How do I build it
+## How do I build it
 
 Java netplot gui and client code
 Run the command 'ant clean build jar' command (in the same path as the 
@@ -29,7 +29,7 @@ This resides in the c_client folder. From this folder run the
 Build menu. This requires that codeblocks is codeblocks IDE installed.
 
 
-How do I run it
+# How do I run it
 
 - Run 'java -jar netplot_gui.jar' on the computer with a GUI interface 
   and a java JVM installed. This will display an empty window and start
@@ -54,13 +54,8 @@ implementation of the netplot clients (and demo program code) are
 included for adding netplot capabilities into software that use 
 these languages.
 
-
 You can now take the client code (which is fairly small) and build
 it into your programs in order to add netplot support to them.
 
-Licensing
-Netplot is distributed under the terms of the GNU Lesser General 
-Public License
-
-Credits
-Many thanks to the authors and contributors to the excellent jfreechart project.
+# Credits
+Many thanks to the authors and contributors to the excellent jfreechart and plotly projects.
