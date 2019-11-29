@@ -12,7 +12,7 @@ import  socket
 import  os
 import  json
 
-class ProgramError(Exception):
+class NetplotError(Exception):
   pass
 
 class UO(object):
@@ -32,62 +32,21 @@ class UO(object):
 
 class ConnectionHandler(object):
     """@brief Responsible for handling the data from a connected socket"""
-
-    SET_CMD     = "set "
-    PLOT_NAME   = "plot_name"
-    INIT        = "init"
-    GRID        = "grid"
-    FRAME_TITLE = "frame_title"
-    PLOT_TITLE  = "plot_title"
-    GRAPH       = "graph"
-
-    PLOT_COUNT  = 0
     
-    SavedGlobalData = False
-    PlotTitle       = ""
-    
-    def __init__(self, uo, options, _socket, localPort):
-        self._uo = uo
-        self._options = options
-        self._socket = _socket
-        self._localPort = localPort
+    GRID_CMD         = "set grid="
+    ADD_PLOT         = "add_plot"
+    OUTPUT_LINE_LIST = None
+    OUTPUT_FILENAME  = "netplot_commands.txt"
+    PLOT_GRID_ID     = "plot_grid_id"
 
-        self._plotDict = {}
-        self._plotArea = localPort-options.bp
-        self._plotNumber = -1
+    def __init__(self, uo, options, _socket, plotGrid):
+        self._uo            = uo
+        self._options       = options
+        self._socket        = _socket
+        self._plotGridID    = plotGrid
         self._fileSaveTimer = None
-        self._fileList = []
         
-        #PJA
-        self.lastPlotNumber = -1
-        
-        
-        
-    def handleConnection(self):
-        """@brief Handle the data from a connected socket"""
-        
-        self._sendString( self._socket, "netplot_version={:.1f}\n".format(NetplotServer.NETPLOT_SVR_VERSION) )
-        if self._localPort == self._options.bp:
-            self.cleanLocalFiles()
-                    
-        try:
-            while True:
-                rxData = self._receiveString(self._socket)
-                self._handleRXData(rxData, self._localPort)
-                self._sendString( self._socket, "OK\n")
-        except IOError:
-            pass
-
-    def cleanLocalFiles(self):
-        """@brief clean the local JSON files.
-           @return None."""
-        entries = os.listdir(self._options.path)
-        entries.sort()
-        for entry in entries:
-            absPath = os.path.join(self._options.path, entry)
-            if entry.endswith(".json") and os.path.isfile(absPath):
-                os.remove(absPath)
-                self._uo.info("Removed {}".format(entry))
+        self.plotCount      = 0
 
     def _sendString(self, _socket, _string):
         """@brief Send a string on a socket
@@ -98,143 +57,58 @@ class ConnectionHandler(object):
         _socket.send(_bytes)
 
     def _receiveString(self, _socket):
-        """@brief Receive a string on a socket."""
+        """@brief Receive a string on a socket.
+           @param _socket The connected socket."""
         rxBytes = _socket.recv(NetplotServer.BUFFER_SIZE)
         return rxBytes.decode('utf-8')
-    
-    def _getKeyValue(self, rxData):
-        rxData = rxData.rstrip("\r")
-        rxData = rxData.rstrip("\n")
-        elems = rxData.split("=")
-        if len(elems) == 2:
-            key = elems[0][4:]
-            value = elems[1]
-            return (key, value) 
-        return None
-       
-    def addToDict(self, rxData):
-        """@brief Add data to the dictionary
-           @param rxData Received data"""
-        elems = self._getKeyValue(rxData)
-        if elems and len(elems) == 2:
-            if elems[0] == ConnectionHandler.FRAME_TITLE or\
-               elems[0] == ConnectionHandler.PLOT_TITLE or \
-               elems[0] == ConnectionHandler.GRAPH:
-                self._plotDict[elems[0]]=elems[1]
-            elif elems[0] == ConnectionHandler.GRID:
-                elems = elems[1].split(",")
-                if len(elems) == 2:
-                    x=int(elems[0])
-                    y=int(elems[1])
-                    self._plotDict[ConnectionHandler.GRID]=(x,y)
-            elif elems[0] == ConnectionHandler.PLOT_NAME:
-                self._plotDict[elems[0]]=elems[1]
-                if elems and len(elems) == 2:
-                    plotName = elems[1]
-                    elems = plotName.split(" ")
-                    self._plotNumber = int(elems[0])
 
-            else:
-                key = elems[0]
-                value = elems[1]
-                self._plotDict[key]=value
-
-        else:
-            elems = rxData.split(":")
-            if len(elems) == 3:
-                if "plot_values" not in self._plotDict:
-                    self._plotDict["plot_values"]=[]
-                plotIdx = int(elems[0])
-                xVal = float(elems[1])
-                yVal = float( elems[2].strip("\n") )
-                self._plotDict["plot_values"].append( (plotIdx, xVal, yVal) )
-                
-    def _saveDict(self, plotDict, filename):
-        """@brief Save dict to file.
-           @param plotDict The dict to save.
-           @param filename The file to save into.
-           @return The absolute filename"""
-        absFilename = os.path.join( self._options.path, filename)
-        jsonData = json.dumps(plotDict, indent=4, sort_keys=True)
-        #Ensure we don't overwrite a file
-        if not os.path.isfile(absFilename):
-            fd = open(absFilename,"w")
-            fd.write(jsonData)
-            fd.close()
-            #self._uo.info("PJA: Saved {} to {}".format(jsonData, filename))
-        return absFilename
-    
-    def _savePlotFile(self):
-        """@brief Save dict to plot file."""
-        #If we have a valid plot number
-        if self._plotNumber != -1:
-            self._plotDict['plot_title']=ConnectionHandler.PlotTitle
-            filename = "{:d}_{:03d}.json".format(self._plotArea, self._plotNumber)
-            absFilename = self._saveDict(self._plotDict, filename)
-            self._fileList.append(absFilename)
-
-    def _saveGlobal(self):
-        """@brief Save global dict file."""
-        filename = "global_config.json" #PJA parameterize 
-        absFilename = self._saveDict(self._plotDict, filename)
-        self._fileList.append(absFilename)
+    def handleConnection(self):
+        """@brief Handle the data from a connected socket"""
         
-    def _saveFileListFile(self):
-        """@brief Save the list of files we have saved."""
-        entries = os.listdir(self._options.path)
-        entries.sort()
-        jsonFiles = []
-        for entry in entries:
-            if entry.endswith(".json"):
-                jsonFiles.append(entry)
-                
-        filename = "filelist.json" #PJA parameterize 
-        absFilename = os.path.join( self._options.path, filename)
-        jsonData = json.dumps(jsonFiles, indent=4, sort_keys=True)
-        fd = open(absFilename,"w")
-        fd.write(jsonData)
-        fd.close()
-        self._uo.info("Saved {}".format(filename))
-        
-    def _handleRXData(self, rxData, localPort):
+        self._sendString( self._socket, "netplot_version={:.1f}\n".format(NetplotServer.NETPLOT_SVR_VERSION) )                    
+        try:
+            while True:
+                rxData = self._receiveString(self._socket)
+                self._handleRXData(rxData)
+                self._sendString( self._socket, "OK\n")
+        except IOError:
+            pass
+
+    def _handleRXData(self, rxData):
         """@brief Handle RX data from the client.
            @param rxData The RX data from the client.
-           @param localPort The local TCP port on which the socket is connected.
            @return None"""
-        #print("rxData=<"+rxData+">")
+        #print("rxData=<"+rxData+">")  
+        #This should be the first command we receive on the first socket connection
+        if self._plotGridID == 0 and rxData.startswith(ConnectionHandler.GRID_CMD):
+            self._removeOutputFile()
+            ConnectionHandler.OUTPUT_LINE_LIST = []
 
-        if rxData.find(ConnectionHandler.PLOT_NAME) >= 0:
-            #if bool(self._plotDict) and 'plot_values' in self._plotDict.keys() and len(self._plotDict['plot_values']) > 0:
-                self._savePlotFile()
-                self._plotDict={}
-                                
-        if rxData.find(ConnectionHandler.PLOT_TITLE) >= 0:
-            #We receive the global data first (grid etc)
-            if not ConnectionHandler.SavedGlobalData:
-                self._saveGlobal()
-                ConnectionHandler.SavedGlobalData = True
-                self._plotDict={}
-
-            #Read the plot title
-            elems = self._getKeyValue(rxData)
-            if len(elems) > 1:
-                ConnectionHandler.PlotTitle = elems[1]
-                #self._plotDict[elems[0]]=elems[1]
-                
-        #We expect to receive and empty line after all plot values have been received.
-        elif( ConnectionHandler.SavedGlobalData and bool(self._plotDict) and len(rxData) ==0 ):
-            if self._plotDict and 'plot_values' in self._plotDict.keys() and len(self._plotDict['plot_values']) > 0:
-                self._savePlotFile()
-                self._plotDict={}
-
-        else:
-            self.addToDict(rxData)
-        
+        if rxData.startswith(ConnectionHandler.ADD_PLOT):
+            ConnectionHandler.OUTPUT_LINE_LIST.append("set plot_grid={:d}\n".format(self._plotGridID) )
+                        
+        ConnectionHandler.OUTPUT_LINE_LIST.append(rxData)
+            
         if self._fileSaveTimer:
             self._fileSaveTimer.cancel()
 
-        self._fileSaveTimer = threading.Timer(0.2, self._saveFileListFile)
+        self._fileSaveTimer = threading.Timer(0.2, self._saveOutputFile)
         self._fileSaveTimer.start()
+        
+    def _saveOutputFile(self):
+        """@brief Save all the commands received to the output file."""
+        absFilename = os.path.join( self._options.path, ConnectionHandler.OUTPUT_FILENAME)
+        fd = open(absFilename,"w")
+        for line in ConnectionHandler.OUTPUT_LINE_LIST:
+            fd.write(line)
+        fd.close()
+        self._uo.info("Saved {}".format(ConnectionHandler.OUTPUT_FILENAME))
+        
+    def _removeOutputFile(self):
+        absPath = os.path.join(self._options.path, ConnectionHandler.OUTPUT_FILENAME)
+        if os.path.isfile(absPath):
+            os.remove(absPath)
+            self._uo.info("Removed {}".format(ConnectionHandler.OUTPUT_FILENAME))
         
 class NetplotServer(object):
     """@brief Responsibe for reciving data from netplot clients and saving it to local files"""
@@ -279,7 +153,7 @@ class NetplotServer(object):
         if localPort == self._options.bp:
             #Reset global data as we're starting a new set of plots
             ConnectionHandler.SavedGlobalData = False
-        connectionHandler = ConnectionHandler(self._uo, self._options, _socket, localPort)
+        connectionHandler = ConnectionHandler(self._uo, self._options, _socket, localPort-self._options.bp)
         connectionHandler.handleConnection()
 
 #Very simple cmd line template using optparse
