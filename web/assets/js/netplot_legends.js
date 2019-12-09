@@ -1,56 +1,103 @@
-const FILE_LIST_FILE                = 'filelist.json';
+const INPUT_FILENAME        = 'netplot_commands.txt';
+const PLOT_GRID_CMD         = "set plot_grid";
+const PLOT_NAME_CMD         = 'set plot_name';
 
-var PlotFileList;
-var FileDictList     = {};
+class UO {
+    constructor(debugEnabled) {
+        this.debugEnabled=debugEnabled;
+    }
+    
+    info(msg) {
+        console.log("INFO:  "+msg);
+    }
+    
+    warn(msg) {
+        console.log("WARN:  "+msg);
+    }
+    
+    error(msg) {
+        console.log("ERROR: "+msg);
+    }
+    
+    debug(msg) {
+        if( this.debugEnabled ) {
+            console.log("DEBUG: "+msg);
+        }
+    }
+}
 
-var legendsDiv = document.getElementById('legendsID');
+var uo = new UO()
+
+var legends = {}
+
+var traceNumber = 0;
+
+var lastPlotGridIndex = 0;
+
+var legendsTable = document.getElementById('legendsTable');
 
 class NetplotFileReader {
+
     //Responsible for reading data from the http server    
     constructor() {
-        this.rxFileCount = 0;
+        this.plotName = "";
+        //Add title line
+        legendsTable.innerHTML += '<tr><th>LEGEND</th><th>PLOT NAME</th></tr>';
     }
     
     read() {
-        this.getFileFromServer(FILE_LIST_FILE);
-        return FileDictList;
+        console.log("READ: "+INPUT_FILENAME);
+        this.getFileFromServer(INPUT_FILENAME);
     }
     
     getFileFromServer = function (filename) {
-      PlotFileList = [];
       $.ajax({
         url:filename,
         success: function (data){
-          var fileList = data.toString().split(",");
-          for( var index in fileList ) {
-              PlotFileList.push(fileList[index]);
+          if( data ) {
+              var lines = data.split('\n');
+              for( var index in lines ) {
+                var line = lines[index];
+
+                if( line.startsWith(PLOT_NAME_CMD) ) {
+                    line.replace("\r", "");
+                    line.replace("\n", "");
+                    var elems = line.split("=");
+                    if( elems.length  >= 2 ) {
+                        this.plotName = elems[1];
+                    }
+                }
+                else if( line.startsWith(PLOT_GRID_CMD) ) {
+                   line.replace("\r", "");
+                   line.replace("\n", "");
+                   var elems = line.split("=");
+                   if( elems.length  == 2 ) {
+                       var plotGrid = Number(elems[1]);
+                       //If the plot grid has changed we reset the trace number
+                       if( plotGrid != lastPlotGridIndex ) {
+                           traceNumber=0;
+                       }
+
+                       var legend = plotGrid+"_"+traceNumber;
+                       legends[legend] = this.plotName;
+                       uo.info(legend+" = "+this.plotName);
+
+                       if( this.plotName ) {
+                           legendsTable.innerHTML += '<tr><td >'+legend+'</td><td style="text-align:left">'+this.plotName+'</td></tr>';
+                       }
+                       
+                       lastPlotGridIndex=plotGrid;
+                   }
+                   traceNumber=traceNumber+1;
+                }
+              }
           }
-          netplotFileReader.processFiles();
         }
-      });
-    }
-    
-    processFiles = function () {
-        for( var index in PlotFileList ) {
-            netplotFileReader.processFile(PlotFileList[index]);
-        }
-    }
-    
-    processFile = function (filename) {
-      //console.log("PJA ProcessFile: "+filename);
-      $.ajax({
-        url:filename,
-        success: function (data) {
-            var jsonData = JSON.stringify(data);
-            var plotParamDict = JSON.parse(jsonData);
-            var plotName = plotParamDict['plot_name'];
-            if( plotName ) {
-                legendsDiv.innerHTML += '<li>' + filename + ':    ' + plotName + '</li>';
-            }
-        }
+
       });
     }
     
 }
 var netplotFileReader = new NetplotFileReader();
 netplotFileReader.read();
+

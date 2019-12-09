@@ -1,16 +1,23 @@
 #!/usr/bin/python3
+
 #/*****************************************************************************************
 # *                             Copyright 2019 Paul Austen                                *
 # *                                                                                       *
 # * This program is distributed under the terms of the GNU Lesser General Public License  *
 # *****************************************************************************************/
  
-import  sys
-from    optparse import OptionParser
-import  threading
-import  socket
-import  os
-import  json
+import sys
+from   optparse import OptionParser
+import threading
+import socket
+import os
+import json
+import http.server
+import cgitb
+import socketserver
+import logging
+import cgi
+from   time import sleep
 
 class NetplotError(Exception):
   pass
@@ -126,6 +133,11 @@ class NetplotServer(object):
     def serve(self):
         """@brief Run the server on all ports.
            @return None"""
+           
+        #Start the web server to display the plots
+        wsThread = threading.Thread(target=self.startWebServer)
+        wsThread.start()
+        
         for port in range(self._options.bp, self._options.bp+self._options.pc):
             _thread = threading.Thread(target=self._servePort, args=(port,))
             _thread.start()
@@ -156,15 +168,87 @@ class NetplotServer(object):
         connectionHandler = ConnectionHandler(self._uo, self._options, _socket, localPort-self._options.bp)
         connectionHandler.handleConnection()
 
+    def startWebServer(self):
+        """@brief Start the web server."""
+        
+        #Delay so that we see the output from the HTTP server after the 100 tcp ports are shown.
+        sleep(1)
+        
+        try:
+            #Set to the web server root
+            os.chdir(self._options.root)
+            self._uo.info("Web Server Root: {}".format(self._options.root))
+            cgitb.enable()
+            
+            Handler = ServerHandler
+            port    = self._options.port
+            
+            Handler.cgi_directories = [self._options.cgi]
+
+            self._uo.info("serving at port {:d}".format(self._options.port) )
+
+            socketserver.TCPServer.allow_reuse_address = True
+            socketserver.ThreadingTCPServer.allow_reuse_address = True
+            server = http.server.HTTPServer(("", options.port), Handler)
+
+            server.serve_forever()
+            
+        #If the user presses CTRL C
+        except KeyboardInterrupt:
+    	    self.shutdown(server)
+
+        #If the program throws a system exit exception
+        except SystemExit:
+    	    self.shutdown(server)
+          
+        except:
+             raise
+        
+    def shutdown(self, server):
+        """Shutdown the web server"""
+        if server != None:
+            server.socket.close()
+            self._uo.info("Shutdown server on port {:d}".format(self._options.port) )
+        
+class ServerHandler(http.server.CGIHTTPRequestHandler):
+
+    QUERY_STRING = "QUERY_STRING"
+    
+    def do_GET(self):
+        logging.warning("======= GET STARTED =======")
+        logging.warning(self.headers)
+        http.server.CGIHTTPRequestHandler.do_GET(self)
+
+    def do_POST(self):
+        logging.warning("======= POST STARTED =======")
+        logging.warning(self.headers)
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ={'REQUEST_METHOD':'POST',
+                     'CONTENT_TYPE':self.headers['Content-Type'],
+                     })
+        logging.warning("======= POST VALUES =======")
+        for item in form.list:
+            logging.warning("%s=%s" % (item.name, item.value) )
+        logging.warning("\n")
+        http.server.CGIHTTPRequestHandler.do_POST(self)
+   
+
+        
+        
 #Very simple cmd line template using optparse
 if __name__== '__main__':
     uo = UO()
 
-    opts=OptionParser(usage='Run a netplot server. This recives data from client connections and saves the plots to local files.')
-    opts.add_option("--debug",      help="Enable debugging.", action="store_true", default=False)
-    opts.add_option("--bp",         help="The netplot base TCP port (default = {}).".format(NetplotServer.DEFAULT_BASE_PORT), type="int", default=NetplotServer.DEFAULT_BASE_PORT)
-    opts.add_option("--pc",         help="The number of TCP ports to listen on (default = {}).".format(NetplotServer.DEFAULT_PORT_COUNT), type="int", default=NetplotServer.DEFAULT_PORT_COUNT)
-    opts.add_option("--path",       help="The path to store the json files (default={}).".format(os.getcwd()), default=os.getcwd())
+    opts=OptionParser(usage='Run a netplot server. This has two functions 1: Receives data from netplot clients and saves the data to the netplot_commands.txt file. 2: A web server to view the plot data.')
+    opts.add_option("--debug",help="Enable debugging.", action="store_true", default=False)
+    opts.add_option("--bp",   help="The netplot base TCP port (default = {}).".format(NetplotServer.DEFAULT_BASE_PORT), type="int", default=NetplotServer.DEFAULT_BASE_PORT)
+    opts.add_option("--pc",   help="The number of TCP ports to listen on (default = {}).".format(NetplotServer.DEFAULT_PORT_COUNT), type="int", default=NetplotServer.DEFAULT_PORT_COUNT)
+    opts.add_option("--path", help="The path to store the json files (default={}).".format(os.getcwd()), default=os.getcwd())
+    opts.add_option("--port", help="Followed by the web server port (default=8080)", type="int", default=8080)
+    opts.add_option("--root", help="Followed by the web server root path", default=".")
+    opts.add_option("--cgi",  help="A folder (in the root path) containing the cgi scripts (default=/cgi-bin).", default="/cgi-bin")
 
     try:
         (options, args) = opts.parse_args()

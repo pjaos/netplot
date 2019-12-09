@@ -3,10 +3,23 @@
 <meta charset = "utf-8" />
 </head>
 <html>
+<style>
+input {
+    width: 100%; /* force to expand to container's width */ 
+    border: 7px solid #DFDFDF;  
+    padding: 0 10px;
+    margin: 0 -17px; /* negative margin = border-width + horizontal padding */ 
+    background: #DFDFDF;
+}
+</style>
 
-<div style="height: 99vh">
+<div style="height: 98vh">
    <div id="plotDiv" style="height: inherit"/>
 </div>
+
+<table border="1" width="100%">
+<input class="input" type="text" id="statusBar" readonly>    
+</table>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>

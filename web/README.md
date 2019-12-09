@@ -1,18 +1,33 @@
 # Netplot Web interface
-Up to the advent of the Web interface the Java application had to be running
-that display a window on which the plots appeared.
+Up to the advent of the Web interface the Java application had to be running in 
+order to display a window on which the plots appeared. The web interface is an
+alternative to the Java application (netplot.jar).
 
-This is not required for the web interface as the netplot_server.py file must be running instead. Once running servers listen on TCP/IP ports 9600 - 9699 for connections from netplot clients.
+In order to run the web interface the following command should be executed.
 
-When a netplot client sends plots to netplot_server.py, netplot_server.py  
-will save each plot trace as a separate JSON file in the local folder.
+```
+    ./netplot_server.py 
+    INFO: Serve on TCP/IP port 9600
+    INFO: Serve on TCP/IP port 9602
+    INFO: Serve on TCP/IP port 9601
+    INFO: Serve on TCP/IP port 9603
+    ...
+    INFO: Serve on TCP/IP port 9696
+    INFO: Serve on TCP/IP port 9697
+    INFO: Serve on TCP/IP port 9698
+    INFO: Serve on TCP/IP port 9699
+    INFO: Web Server Root: .
+    INFO: serving at port 8080
+```
 
-In order to display the plots via a web interface a web server must be running 
-and use the location where the above JSON files sit (same folder where 
-netplot_server.py sits) as it's root folder. 
+This shows all 100 TCP ports waiting to receive connections from the netplot client. and finally the web server TCP port.
 
-Once the web server is running a user can connect to it using a browser and
-the graphs that the netplot client sent will be displayed as the folder contains an index.html file. If the user selects the legends.html then a list of trace legends is displayed that relates each plot ID.
+When running netplot_server.py is ready to receive netplot commands from the netplot client. These commands are saved to the netplot_commands.txt file in the local folder.
+
+The above output shows that port 8080 is the web server port.
+Once the web server is running a user can connect to it using a browser and the graphs that the netplot client sent will be displayed as the folder contains an index.html file.
+
+![Example plot with a single trace.](../netplot_web.png)
 
 A plot ID can be found by hovering a mouse over a trace in the browser. The format of this is XX_YYY
 
@@ -20,7 +35,7 @@ A plot ID can be found by hovering a mouse over a trace in the browser. The form
 
 - YYY The plot trace number. A number that details the trace number of the plot.
 
-If the user select the legends.html a page is displayed that shows how the above plot ID releates to the plot name as defined by the netplot client.
+If the user selects a trace on any plot then the status bar at the bottom of the web page will display the entire legend text as defined when the netplot client sent the data to this netplot server.
 
 ** Currently only XY graphs are supported on the web interface**
 

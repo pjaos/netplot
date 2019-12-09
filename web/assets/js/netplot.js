@@ -33,8 +33,13 @@ const PLOT_CMD_LIST         = [PLOT_GRID_CMD, PLOT_TITLE_CMD, PLOT_NAME_CMD, PLO
                                TICK_COUNT_CMD];
 
 const ADD_PLOT_CMD          = "add_plot";
-
 const PLOT_DIV_NAME         = "plotDiv";
+const STATUS_BAR            = "statusBar";
+
+var newPlot = document.getElementById(PLOT_DIV_NAME);
+var statusBar = document.getElementById(STATUS_BAR);
+
+var plotNameList = [];
 
 class UO {
     constructor(debugEnabled) {
@@ -71,6 +76,8 @@ var plotLayout = {
   },
   hovermode:'closest'
 };
+
+var clickCount = 0;
 
 class PlotConfig {
     constructor() {
@@ -113,6 +120,7 @@ class PlotConfig {
         }
         else if( cmd.startsWith(PLOT_NAME_CMD) ) {
             this.plotName=arg;
+            plotNameList.push(this.plotName);
         }
         else if( cmd.startsWith(PLOT_X_AXIS_NAME_CMD) ) {
             this.plotXAxisName=arg;
@@ -221,6 +229,16 @@ class Netplot {
 
         this.plotLayoutPaperBGColor = "white";
         this.plotLayoutPlotBGColor  = "white";
+        
+        statusBar.ondblclick = this.statusBarDoubleClick;
+    }
+    
+    /**
+     * @brief Called when the status bar is double clicked to show the legends 
+     *        page.
+     **/
+    statusBarDoubleClick() {
+        window.location.href = "legends.html";
     }
     
     /**
@@ -391,6 +409,12 @@ class Netplot {
         console.log(plotLayout); 
         console.log(plotTraces); 
         Plotly.newPlot(PLOT_DIV_NAME, plotTraces, plotLayout);
+
+        newPlot.on('plotly_click', function(data){
+            var plotIndex = data.points[0].curveNumber;
+            statusBar.value = plotNameList[plotIndex];
+        });
+
     }
 
 }
