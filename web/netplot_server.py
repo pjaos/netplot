@@ -18,6 +18,7 @@ import socketserver
 import logging
 import cgi
 from   time import sleep
+from   shutil import copyfile
 
 class NetplotError(Exception):
   pass
@@ -40,19 +41,27 @@ class UO(object):
 class ConnectionHandler(object):
     """@brief Responsible for handling the data from a connected socket"""
     
-    GRID_CMD         = "set grid="
-    ADD_PLOT         = "add_plot"
-    OUTPUT_LINE_LIST = None
-    OUTPUT_FILENAME  = "netplot_commands.txt"
-    PLOT_GRID_ID     = "plot_grid_id"
+    GRID_CMD                = "set grid="
+    ADD_PLOT                = "add_plot"
+    OUTPUT_LINE_LIST        = None
+    OUTPUT_FILENAME         = "netplot_commands.txt"
+    PLOT_GRID_ID            = "plot_grid_id"
+    PLOT_TITLE              = "set frame_title"
+    ASSETS_FOLDER           = "assets"
+    HTML_FOLDER             = "html"
+    JAVASCRIPT_FOLDER       = "js"
+    INDEX_HTML_FILE         = "index.html"
+    NETPLOT_JS_FILE         = "netplot.js"
+    NETPLOT_LEGENDS_JS_FILE = "netplot_legends.js"
+    PLOT_LIST_FILENAME      = "plot_list.txt"
 
     def __init__(self, uo, options, _socket, plotGrid):
-        self._uo            = uo
-        self._options       = options
-        self._socket        = _socket
-        self._plotGridID    = plotGrid
-        self._fileSaveTimer = None
-        
+        self._uo              = uo
+        self._options         = options
+        self._socket          = _socket
+        self._plotGridID      = plotGrid
+        self._fileSaveTimer   = None
+        self._plotCreateTimer = None
         self.plotCount      = 0
 
     def _sendString(self, _socket, _string):
@@ -102,14 +111,131 @@ class ConnectionHandler(object):
         self._fileSaveTimer = threading.Timer(0.2, self._saveOutputFile)
         self._fileSaveTimer.start()
         
+    def _getPlotPath(self):
+        """@brief Get the plot path to save the plot into."""
+        plotPath = ""
+        for line in ConnectionHandler.OUTPUT_LINE_LIST:
+            if line.startswith(ConnectionHandler.PLOT_TITLE):
+                line = line.rstrip("\r")
+                line = line.rstrip("\n")
+                elems = line.split("=")
+                if len(elems) > 1:
+                    plotPath = elems[1];
+                    
+        plotPath = plotPath.replace(" ","_")
+        plotPath = plotPath.replace("/","_")
+        return os.path.join( self._options.path, plotPath)
+        
+    def _createPlotPath(self):
+        """@brief Create the plot path to store the plot file.
+           @return The plot path. This will be an empty string if no plot title has been set."""
+        plotPath = self._getPlotPath()
+        if( len(plotPath) ):
+            if not os.path.isdir(plotPath):
+                os.makedirs(plotPath)
+        print("PJA: plotPath={}".format(plotPath))
+        return plotPath
+                
+    def _updateNetplotFile(self, plotPath):
+        """@brief Update the netplot file.
+           @param plotPath The path to save the file.
+           @return None"""
+        netplotCmdsFile = os.path.join(self._options.path, ConnectionHandler.OUTPUT_FILENAME)
+        #!!! We must create this every time as it may be called several times before the plot is complete.
+        destFile = os.path.join(plotPath, ConnectionHandler.OUTPUT_FILENAME)
+        copyfile(netplotCmdsFile, destFile)
+            
+    def _updateIndexHtmlFile(self, plotPath):
+        """@brief Update the index.html file in the plot folder.
+           @param plotPath The path for this plot (top level folder).
+           @return None"""
+        srcPath = os.path.join(self._options.path, ConnectionHandler.ASSETS_FOLDER)
+        srcPath = os.path.join(srcPath, ConnectionHandler.HTML_FOLDER)
+        srcFile = os.path.join(srcPath, ConnectionHandler.INDEX_HTML_FILE)           
+        destPath = plotPath
+        destFile = os.path.join(destPath, ConnectionHandler.INDEX_HTML_FILE)                           
+        if not os.path.isdir(destPath):
+            os.makedirs(destPath)
+        copyfile(srcFile, destFile)
+        
+    def _updateJavaScriptFile(self, plotPath, javaScriptFilename):
+        """@brief Copy a javascript file to the assets folder for a plot.
+           @param plotPath The path for this plot (top level folder).
+           @param javaScriptFilename The name of the javascript file to be copied.
+           @return None"""
+        srcPath = os.path.join(self._options.path, ConnectionHandler.ASSETS_FOLDER)
+        srcPath = os.path.join(srcPath, ConnectionHandler.JAVASCRIPT_FOLDER)
+        srcFile = os.path.join(srcPath, javaScriptFilename)           
+        destPath = os.path.join(plotPath, ConnectionHandler.ASSETS_FOLDER)
+        destPath = os.path.join(destPath, ConnectionHandler.JAVASCRIPT_FOLDER)
+        destFile = os.path.join(destPath, javaScriptFilename)                           
+        if not os.path.isdir(destPath):
+            os.makedirs(destPath)
+        copyfile(srcFile, destFile)
+                
+    def _getFileLines(self, theFile):
+        """@brief Read lines of text from a file.
+           @param theFile The file to read from.
+           @return A list of lines read from the file (empty if the file doesn ot exist)."""
+        lines = []
+        if os.path.isfile(theFile):
+            fd = open(ConnectionHandler.PLOT_LIST_FILENAME, "r")
+            lines = fd.readlines()
+            fd.close()
+        return lines
+                    
+    def _writeFileLines(self, theFile, textLines):
+        """@brief Write lines of test to a file.
+           @param theFile The file to write to.
+           @param textLines Lines of text to write to the file.
+           @return None"""
+        fd = open(theFile, "w")
+        print("PJA: len=%d" % ( len(textLines) ) )
+        for line in textLines:
+            print("PJA: write <%s>" % (line) )
+            fd.write(line+"\n");
+        fd.close()
+                           
+    def _updateplotFolderList(self):
+        """@brief Update the list of folders that contain plots.
+                  This file is read by plot_table_build.js to build the table of available plots.
+           @return None"""
+        folderEntries = os.listdir(self._options.path)
+        for folderEntry in folderEntries:
+            absPath = os.path.join(self._options.path, folderEntry)
+            if( os.path.isdir(absPath) and folderEntry not in ("assets", ) ):
+                lines = self._getFileLines(ConnectionHandler.PLOT_LIST_FILENAME)
+
+                newLines=[]
+                for line in lines:
+                    line=line.rstrip('\r')
+                    line=line.rstrip('\n')
+                    if len(line) > 0 and line != folderEntry:
+                        newLines.append(line)
+                newLines.append("{}\n".format(folderEntry))
+                self._writeFileLines(ConnectionHandler.PLOT_LIST_FILENAME, newLines)
+        
     def _saveOutputFile(self):
         """@brief Save all the commands received to the output file."""
+        
+        #Save the output file.
         absFilename = os.path.join( self._options.path, ConnectionHandler.OUTPUT_FILENAME)
         fd = open(absFilename,"w")
         for line in ConnectionHandler.OUTPUT_LINE_LIST:
             fd.write(line)
         fd.close()
         self._uo.info("Saved {}".format(ConnectionHandler.OUTPUT_FILENAME))
+        
+        plotPath = self._createPlotPath()
+        self._updateNetplotFile(plotPath)
+        self._updateIndexHtmlFile(plotPath)
+        self._updateJavaScriptFile(plotPath, ConnectionHandler.NETPLOT_JS_FILE)
+        self._updateJavaScriptFile(plotPath, ConnectionHandler.NETPLOT_LEGENDS_JS_FILE)
+        self._updateplotFolderList()
+        
+
+
+
         
     def _removeOutputFile(self):
         absPath = os.path.join(self._options.path, ConnectionHandler.OUTPUT_FILENAME)
@@ -233,10 +359,7 @@ class ServerHandler(http.server.CGIHTTPRequestHandler):
             logging.warning("%s=%s" % (item.name, item.value) )
         logging.warning("\n")
         http.server.CGIHTTPRequestHandler.do_POST(self)
-   
 
-        
-        
 #Very simple cmd line template using optparse
 if __name__== '__main__':
     uo = UO()

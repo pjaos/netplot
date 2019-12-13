@@ -3,7 +3,8 @@ Up to the advent of the Web interface the Java application had to be running in
 order to display a window on which the plots appeared. The web interface is an
 alternative to the Java application (netplot.jar).
 
-In order to run the web interface the following command should be executed.
+In order to run the web interface the following command should be executed in 
+the web folder of the cloned netplot git repo.
 
 ```
     ./netplot_server.py 
@@ -20,12 +21,17 @@ In order to run the web interface the following command should be executed.
     INFO: serving at port 8080
 ```
 
-This shows all 100 TCP ports waiting to receive connections from the netplot client. and finally the web server TCP port.
+The above details all 100 TCP ports waiting to receive connections from the netplot client followed by the web server TCP port.
 
-When running netplot_server.py is ready to receive netplot commands from the netplot client. These commands are saved to the netplot_commands.txt file in the local folder.
+When running the server is ready to receive netplot commands from the netplot client. These commands are saved to the 
+netplot_commands.txt file in the local folder.
 
-The above output shows that port 8080 is the web server port.
-Once the web server is running a user can connect to it using a browser and the graphs that the netplot client sent will be displayed as the folder contains an index.html file.
+The above output shows that port 8080 is the web server port. Once the web server is running a user can connect to it
+using a browser. A table of available plots are then displayed and the user can select a row in the table to display them.
+
+![Top level plot list table.](../netplot_top_level.png)
+
+Select a row to display a page of traces as configured by the netplot client that sent the data. The example below shows a single plot but many plots can be displayed on one page as is the case with the original Java application.
 
 ![Example plot with a single trace.](../netplot_web.png)
 
