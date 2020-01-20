@@ -191,7 +191,7 @@ public class LineProcessor
           int hour        = dateScanner.nextInt();
           int minute      = dateScanner.nextInt();
           int second      = dateScanner.nextInt();
-          int milliSecond = dateScanner.nextInt();
+          int milliSecond = (int)dateScanner.nextFloat();
           Millisecond ms  = new Millisecond(milliSecond,
                                            second,
                                            minute,

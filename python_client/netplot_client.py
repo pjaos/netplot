@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 #/*****************************************************************************************
 #*                             Copyright 2009 Paul Austen                                *
@@ -11,7 +11,6 @@ import types
 import types
 import time
 from   datetime import datetime
-from   types import StringType
 
 VALID_PLOT_TYPES=['time','bar','xy', 'dial']
 
@@ -89,7 +88,7 @@ class NetPlot:
   def __debugPrint(self, message):
     """Display debug messages if required"""
     if self.__debug:
-      print "DEBUG: %s" % (message)
+      print("DEBUG: %s" % (message))
 
   def connect(self, hostAddress, port):
     """Connect to the server running the netplot GUI (Java) program"""
@@ -105,6 +104,7 @@ class NetPlot:
     self.__debugPrint('Connected to %s:%d' % (self.__hostAddress, self.__port) )
     #Wait for initial connection message
     rxData = self.sock.recv(256)
+    rxData = rxData.decode("utf-8") #Convert bytes like object to string (Python 2->3)
     self.__debugPrint("rxData=%s" % (rxData))
     netPlotServer=1
     elems=rxData.split('=')
@@ -130,11 +130,13 @@ class NetPlot:
   def sendCmd(self, cmd):
     """Send a command to the netplot server"""
     self.__debugPrint('CMD: %s' % (cmd) )
-    self.sock.send('%s\n' % (cmd) )
+    cmdL = "{}\n".format(cmd)
+    self.sock.send( cmdL.encode('utf-8') ) #Convert string to bytes like object (Python 2->3)
     #Wait for response
     while 1:
 	    try:
 	    	rxData = self.sock.recv(256)
+	    	rxData = rxData.decode("utf-8") #Convert bytes like object to string (Python 2->3)
 	    	self.__debugPrint("rxData=%s" % (rxData))
 	    	if rxData.find('OK') == 0:
 	    		break
@@ -223,13 +225,11 @@ class NetPlot:
     self.sendCmd("add_plot")
 
   def __getValue(self, value):
-    if type(value) == types.StringType:
+    if isinstance(value, str):
       return value
-    elif type(value) == types.LongType:
+    elif isinstance(value, int):
       return "%d" % (value)
-    elif type(value) == types.IntType:
-      return "%d" % (value)
-    elif type(value) == types.FloatType:
+    elif isinstance(value, float):
       return "%f" % (value)
     else:
       self.__debugPrint("%s is of an unsupported type (%s), cannot plot" % (repr(value), repr(type(value)))) 
@@ -295,7 +295,7 @@ class NetPlot:
   def addTimePlotValue(self, plotIndex, dateTimeObj, plotValue):
     """The recommended way to send time series plot values where the time is passed from the 
        netplot client to the netplot server (GUI)."""
-    if isinstance(dateTimeObj , StringType):
+    if isinstance(dateTimeObj , str):
         timeStampStr = dateTimeObj
     else:
         timeStampStr = self._getDateTimeString(dateTimeObj)
@@ -396,4 +396,3 @@ class NetPlot:
       
     #Return the number of OK responses received
     return offset/2
-     
