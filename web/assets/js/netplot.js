@@ -3,11 +3,16 @@ const INPUT_FILENAME        = 'netplot_commands.txt';
 const FRAME_TITLE_CMD       = "set frame_title";
 const GRID_CMD              = "set grid";
 const GRAPH                 = "set graph";
+const INIT                  = "init";
+const ENABLE_STATUS         = "enable_status 1";
 
-const GLOBAL_CMD_LIST       = [FRAME_TITLE_CMD, GRID_CMD, GRAPH];
+const GLOBAL_CMD_LIST       = [FRAME_TITLE_CMD, GRID_CMD, GRAPH, INIT, ENABLE_STATUS];
 
 const INIT_CMD              = "init";
 const ENABLE_STATUS_CMD     = "enable_status";
+
+const XY_GRAPH_TYPE         = "xy";
+const TIME_GRAPH_TYPE       = "time";
 
 const PLOT_GRID_CMD         = "set plot_grid";
 const PLOT_TITLE_CMD        = "set plot_title";
@@ -286,6 +291,9 @@ class Netplot {
             //PJA TODO handle all graph types
             this.graphType = arg;
             plotLayout["graph"]=this.graphType;
+            if( ![XY_GRAPH_TYPE, TIME_GRAPH_TYPE].includes(this.graphType) ) {
+                throw this.graphType+" is currently unsupported on the web interface."
+            }
         }
     }
 
@@ -317,7 +325,12 @@ class Netplot {
                 plotLayout[xAxisPrefix]={};
             }
             plotLayout[xAxisPrefix]['title']=plotPlotConfig.plotXAxisName+", "+plotPlotConfig.plotTitle; 
-            plotLayout[xAxisPrefix]['type']="linear";
+            if( this.graphType == TIME_GRAPH_TYPE ) {
+                plotLayout[xAxisPrefix]['type']="scatter";
+            }
+            else {
+                plotLayout[xAxisPrefix]['type']="linear";
+            }
             plotLayout[xAxisPrefix]['autorange']=true;
         }
         
@@ -363,19 +376,28 @@ class Netplot {
         
         plotPlotConfig.incPlotTraceIndex();
     }
-    
+
     addPlotValues(valuesString) {
+        var supported = false;
         var elems = valuesString.split(":");
-        if( elems.length == 3 ) {
+        if( elems.length == 3 ) {        
             var plotIndex = Number(elems[0]);
-            var xValue = Number(elems[1]);
-            var yValue = Number(elems[2]);
-            
-            if( this.graphType == 'xy' ) {
+            if( this.graphType == XY_GRAPH_TYPE ) {
+                var xValue = Number(elems[1]);
+                var yValue = Number(elems[2]);
                 this.trace.x.push(xValue);
                 this.trace.y.push(yValue);
             }
-
+            else if( this.graphType == TIME_GRAPH_TYPE ) {
+                var timeElems = elems[1].split(';')
+                var xValue = timeElems[0]+"-"+timeElems[1]+"-"+timeElems[2]+" "+timeElems[3]+":"+timeElems[4]+":"+timeElems[5]+":"+timeElems[6];
+                var yValue = Number(elems[2]);
+                this.trace.x.push(xValue);
+                this.trace.y.push(yValue);
+            }
+        }
+        else {
+            uo.info("Unsupported  VALUES STRING: "+valuesString);
         }
     }
     
