@@ -36,7 +36,7 @@ DEFAULT_NETPLOT_PORT    = 9600
 
 class NetPlotError(Exception):
   pass
-  
+
 class PlotConfig:
   def __init__(self):
     self.plotName=""
@@ -53,9 +53,9 @@ class PlotConfig:
     self.enableZeroOnXAxis=1
     self.enableZeroOnYAxis=1
     self.tickCount=0
-    
+
 class NetPlot:
-    
+
   TIMESTAMP_DELIM=";"
 
   def __init__(self,debug=0):
@@ -64,19 +64,19 @@ class NetPlot:
     self.__hostAddress=None
     self.__port=None
     self.__serverVersion=None
-    self.__cacheEnabled=False   #In cached plot mode the commands to add plot points to a graph or graphs 
+    self.__cacheEnabled=False   #In cached plot mode the commands to add plot points to a graph or graphs
                                 #are cached until the update() method is called. This means that all plot
-                                #points are sent to the server together. When not in fast mode (default), 
-                                #each time addPlotValues or addXYPlotValues is called then data is sent 
+                                #points are sent to the server together. When not in fast mode (default),
+                                #each time addPlotValues or addXYPlotValues is called then data is sent
                                 #to the server to add these plot points.
-    self.__plotValueCache=[]    
+    self.__plotValueCache=[]
     self.sock = None
 
   @staticmethod
   def GetTimeNowString():
-      """@brief This is a helper method which users can call to obtain a timestamp string that 
+      """@brief This is a helper method which users can call to obtain a timestamp string that
                 can be passed into addTimePlotValue() as the dateTimeObj when plotting time series graphs."""
-      dateTimeObj = datetime.now()    
+      dateTimeObj = datetime.now()
       return ""+str(dateTimeObj.year)+NetPlot.TIMESTAMP_DELIM+\
                 str(dateTimeObj.month)+NetPlot.TIMESTAMP_DELIM+\
                 str(dateTimeObj.day)+NetPlot.TIMESTAMP_DELIM+\
@@ -84,7 +84,7 @@ class NetPlot:
                 str(dateTimeObj.minute)+NetPlot.TIMESTAMP_DELIM+\
                 str(dateTimeObj.second)+NetPlot.TIMESTAMP_DELIM+\
                 str(dateTimeObj.microsecond/1000)
-                  
+
   def __debugPrint(self, message):
     """Display debug messages if required"""
     if self.__debug:
@@ -100,7 +100,7 @@ class NetPlot:
         self.sock.connect((self.__hostAddress, self.__port))
     except socket.error:
         raise socket.error("netplot connect failed to %s:%d" % (self.__hostAddress, self.__port) )
-        
+
     self.__debugPrint('Connected to %s:%d' % (self.__hostAddress, self.__port) )
     #Wait for initial connection message
     rxData = self.sock.recv(256)
@@ -118,15 +118,15 @@ class NetPlot:
     if netPlotServer == 0:
       raise NetPlotError("%s:%d is not a netplot server. Received %s" % (self.__hostAddress, self.__port, rxData) )
     self.sock.setblocking(0)
-    
+
   def disconnect(self):
     """Close a connection to a netplot server"""
     if self.sock != None:
       self.sock.close()
-      
+
   def getServerVersion(self):
     return self.__serverVersion
-    
+
   def sendCmd(self, cmd):
     """Send a command to the netplot server"""
     self.__debugPrint('CMD: %s' % (cmd) )
@@ -144,7 +144,7 @@ class NetPlot:
 	    	  raise NetPlotError(rxData)
 	    except socket.error:
 	      pass
-    
+
   def setGrid(self, rows, columns):
     """Set the number of graphs and their layout"""
     self.sendCmd("set grid=%d,%d" % (rows, columns) )
@@ -152,14 +152,14 @@ class NetPlot:
   def setWindowTitle(self, windowTitle):
     """Set the frame title"""
     self.sendCmd("set %s=%s" % (FRAME_TITLE,windowTitle) )
-    
+
   def setChartLegendEnabled(self, enabled):
     """enable/disable legends on the chart"""
     varValue="false"
     if enabled:
       varValue="true"
     self.sendCmd("set %s=%s" % (ENABLE_LEGEND,varValue) )
-    
+
   def init(self):
     """Initialise the plot. May be called to clear a plot"""
     self.sendCmd("init")
@@ -173,7 +173,7 @@ class NetPlot:
     self.init()
     #By default we enable status messages
     self.enableStatusMessages(True)
-    
+
   def addPlot(self, plotConfig=None):
     if plotConfig != None:
       if plotConfig.plotName != None:
@@ -221,7 +221,7 @@ class NetPlot:
           varValue="true"
         self.sendCmd("set %s=%s" % (ENABLE_ZERO_ON_Y_SCALE,varValue) )
       if plotConfig.tickCount != None:
-        self.sendCmd("set %s=%s" % (TICK_COUNT,str(plotConfig.tickCount)) )  	       		
+        self.sendCmd("set %s=%s" % (TICK_COUNT,str(plotConfig.tickCount)) )
     self.sendCmd("add_plot")
 
   def __getValue(self, value):
@@ -232,10 +232,10 @@ class NetPlot:
     elif isinstance(value, float):
       return "%f" % (value)
     else:
-      self.__debugPrint("%s is of an unsupported type (%s), cannot plot" % (repr(value), repr(type(value)))) 
+      self.__debugPrint("%s is of an unsupported type (%s), cannot plot" % (repr(value), repr(type(value))))
 
   def _getDateTimeString(self, dateTimeObj):
-    """Get the date time string in the required format to plot time series plots.""" 
+    """Get the date time string in the required format to plot time series plots."""
     try:
         return ""+str(dateTimeObj.year)+NetPlot.TIMESTAMP_DELIM+\
                   str(dateTimeObj.month)+NetPlot.TIMESTAMP_DELIM+\
@@ -261,15 +261,15 @@ class NetPlot:
         a.append(NetPlot.TIMESTAMP_DELIM)
         a.append("0")
         return "".join(a)
-    
+
   def addPlotValues(self, values):
     """Add the plot values
 
-       values must be a list of values that contains one element for each 
-       plot added. The number of plots is determined by the number of 
-       times addPlot has been called. Therefore the first element in 
-       the list is added to the first plot, second to the seconds and so on. 
-    """ 
+       values must be a list of values that contains one element for each
+       plot added. The number of plots is determined by the number of
+       times addPlot has been called. Therefore the first element in
+       the list is added to the first plot, second to the seconds and so on.
+    """
     self.__debugPrint('Adding plot values: %s' % (repr(values))  )
     cmdString=""
     firstValue=1
@@ -284,7 +284,7 @@ class NetPlot:
           self.updateIfRequired()
         else:
           self.sendCmd(cmdString)
-        
+
   def updateIfRequired(self):
       """Call a plot update if we need to do so becausethere are a lot of plot points outstanding."""
       if self.__cacheEnabled:
@@ -293,24 +293,24 @@ class NetPlot:
               self.update()
 
   def addTimePlotValue(self, plotIndex, dateTimeObj, plotValue):
-    """The recommended way to send time series plot values where the time is passed from the 
+    """The recommended way to send time series plot values where the time is passed from the
        netplot client to the netplot server (GUI)."""
     if isinstance(dateTimeObj , str):
         timeStampStr = dateTimeObj
     else:
         timeStampStr = self._getDateTimeString(dateTimeObj)
-        
+
     cmdString="%d:%s:%s" % (plotIndex,timeStampStr, self.__getValue(plotValue))
     if self.__cacheEnabled:
       self.__plotValueCache.append(cmdString)
       self.updateIfRequired()
-      
+
     else:
       self.sendCmd(cmdString)
-    
+
   def addXYPlotValues(self, plotIndex, xValue, yValue):
     """Add the XY plot values
-    """ 
+    """
     self.__debugPrint('Adding XY plot values: %f:%f' % (xValue, yValue)  )
     msg="%d:%E:%E" % (plotIndex,xValue,yValue)
     if self.__cacheEnabled:
@@ -323,7 +323,7 @@ class NetPlot:
     """Clear the plot referenced by plotIndex"""
     self.__debugPrint('Clearing plot %d' % (plotIndex)  )
     self.sendCmd("clear %d" % (plotIndex) )
-    
+
   def replot(self, plotIndex):
     """replot causes subsequent values to overwrite previous ones.
        This is more efficient than clear and stops screen flicker
@@ -336,13 +336,13 @@ class NetPlot:
     """Enable/disable the status messages on the display window"""
     if enabled:
       self.sendCmd("enable_status 1")
-    else:	
+    else:
       self.sendCmd("enable_status 0")
-      
+
   def enableCache(self, enabled):
     """Enable/Disable the plot cache"""
     self.__cacheEnabled=enabled
-	
+
   def update(self):
     """Send all plotValueCache plot points.
        Only call this when__cacheEnabled is True"""
@@ -351,14 +351,14 @@ class NetPlot:
     if cmdCount == 0:
     	#quit
       return
-      
+
     #Build a single string containing all the commands
     cmd=""
     for plotValue in self.__plotValueCache:
       cmd="%s%s\n" % (cmd,plotValue)
     #empty the cache
     self.__plotValueCache = []
-      
+
     self.__debugPrint('CMD: %s' % (cmd) )
     self.sock.send('%s\n' % (cmd) )
     #Wait for responses
@@ -369,7 +369,7 @@ class NetPlot:
         rxCmdCount = rxCmdCount + self.__processResponse(rxData)
       except socket.error:
         pass
-       
+
   def __processResponse(self, rxData):
     """Process the data received from the netplot server
     	Return: The number of ok responses received
@@ -377,22 +377,22 @@ class NetPlot:
     """
     if rxData == None:
     	raise NetPlotError("rxData from server == None")
-    	
+
     if len(rxData) == 0:
       raise NetPlotError("No rxData received from netplot server")
-    
+
     offset=0
     #Process all responses received in the rxData
     while offset < len(rxData):
       if rxData[offset:].find('OK') == 0:
         offset=offset+2
-        
+
       elif rxData[offset:].find('ERROR: ') == 0:
 	      raise NetPlotError(rxData)
-	      
+
       if rxData[offset] == '\n' or\
          rxData[offset] == '\r':
         offset=offset+1
-      
+
     #Return the number of OK responses received
     return offset/2
