@@ -121,7 +121,7 @@ class PlotDataStore(object):
     PLOT_TITLE              = "PLOT_TITLE"
     GRAPH_TYPE              = "GRAPH_TYPE"
 
-    EXCLUDE_FOLDER_LIST     = ("assets", ".git")
+    EXCLUDE_FOLDER_LIST     = ("assets", ".git", "images")
     JSON_INDENT             = 0
     ASSETS_FOLDER           = "assets"
     HTML_FOLDER             = "html"
@@ -505,6 +505,11 @@ class PlotTool(object):
 
                 if self._options.create and self._options.append:
                     raise PlotToolError("You cannot create and append plots")
+
+                names = self._options.n.split(',')
+                for name in names:
+                    if name in PlotDataStore.EXCLUDE_FOLDER_LIST:
+                        raise PlotToolError("{} is an invalid plot name ({} are not allowed)".format(name, ",".join(PlotDataStore.EXCLUDE_FOLDER_LIST) ))
 
                 rows = self._getData()
                 self._plotRows(rows)
