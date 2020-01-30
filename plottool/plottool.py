@@ -304,6 +304,8 @@ class PlotTool(object):
     INDEPENDANT     = "independent"
     LINES           = "line"
     DASH            = "dash"
+    SHAPE           = "shape"
+    SPLINE          = "spline"
 
     TRACE           = "trace"
     PLOTTRACES      = "plottraces"
@@ -474,6 +476,9 @@ class PlotTool(object):
         if options.dash:
             trace[PlotTool.LINE][PlotTool.DASH]=PlotTool.DASH
 
+        if self._options.smooth:
+            trace[PlotTool.LINE][PlotTool.SHAPE]=PlotTool.SPLINE
+
         plotDataStore.store(plotLayout, trace)
         self.info("Took {:.1f} seconds to save the JSON file the web server requires.".format(time()-startTime))
 
@@ -528,6 +533,7 @@ if __name__== '__main__':
     opts.add_option("--log",    help="Set a Log Y axis.", action="store_true", default=False)
     opts.add_option("--lw",     help="Define the trace line width (default=1.0)", type="float", default=1.0)
     opts.add_option("--dash",   help="Set the trace line to a dashed line.", action="store_true", default=False)
+    opts.add_option("--smooth", help="Smooth the trace line.", action="store_true", default=False)
 
     opts.add_option("--start",  help="A start time for plot records (format = 2020-01-24 04:11:55.845981 of part of, E.G 2020-01-24).",default=None)
     opts.add_option("--stop",   help="A stop time to plot records (format as above).",default=None)
