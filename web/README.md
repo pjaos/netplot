@@ -1,13 +1,15 @@
 # Netplot Web interface
-Up to the advent of the Web interface the Java application had to be running in 
+Up to the advent of the Web interface the Java application had to be running in
 order to display a window on which the plots appeared. The web interface is an
-alternative to the Java application (netplot.jar).
+experimental alternative to the Java application (netplot.jar).
+Currently this has only been tested on google chrome.
 
-In order to run the web interface the following command should be executed in 
+
+In order to run the web interface the following command should be executed in
 the web folder of the cloned netplot git repo.
 
 ```
-    ./netplot_server.py 
+    ./netplot_server.py
     INFO: Serve on TCP/IP port 9600
     INFO: Serve on TCP/IP port 9602
     INFO: Serve on TCP/IP port 9601
@@ -23,7 +25,7 @@ the web folder of the cloned netplot git repo.
 
 The above details all 100 TCP ports waiting to receive connections from the netplot client followed by the web server TCP port.
 
-When running the server is ready to receive netplot commands from the netplot client. These commands are saved to the 
+When running the server is ready to receive netplot commands from the netplot client. These commands are saved to the
 netplot_commands.txt file in the local folder.
 
 The above output shows that port 8080 is the web server port. Once the web server is running a user can connect to it
@@ -43,5 +45,4 @@ A plot ID can be found by hovering a mouse over a trace in the browser. The form
 
 If the user selects a trace on any plot then the status bar at the bottom of the web page will display the entire legend text as defined when the netplot client sent the data to this netplot server.
 
-** Currently only XY graphs are supported on the web interface**
-
+** Currently only XY and time series graphs are supported on the web interface**
