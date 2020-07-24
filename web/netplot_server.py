@@ -5,7 +5,7 @@
 # *                                                                                       *
 # * This program is distributed under the terms of the GNU Lesser General Public License  *
 # *****************************************************************************************/
- 
+
 import sys
 from   optparse import OptionParser
 import threading
@@ -36,11 +36,11 @@ class UO(object):
         print('WARN:  {}'.format(text))
 
     def error(self, text):
-        print('ERROR: {}'.format(text))    
+        print('ERROR: {}'.format(text))
 
 class ConnectionHandler(object):
     """@brief Responsible for handling the data from a connected socket"""
-    
+
     GRID_CMD                = "set grid="
     ADD_PLOT                = "add_plot"
     OUTPUT_LINE_LIST        = None
@@ -54,6 +54,7 @@ class ConnectionHandler(object):
     NETPLOT_JS_FILE         = "netplot.js"
     NETPLOT_LEGENDS_JS_FILE = "netplot_legends.js"
     PLOT_LIST_FILENAME      = "plot_list.txt"
+    ENABLE_ACK              = "enable_ack"
 
     def __init__(self, uo, options, _socket, plotGrid):
         self._uo              = uo
@@ -62,7 +63,8 @@ class ConnectionHandler(object):
         self._plotGridID      = plotGrid
         self._fileSaveTimer   = None
         self._plotCreateTimer = None
-        self.plotCount      = 0
+        self.plotCount        = 0
+        self.ackEnabled       = True
 
     def _sendString(self, _socket, _string):
         """@brief Send a string on a socket
@@ -80,13 +82,14 @@ class ConnectionHandler(object):
 
     def handleConnection(self):
         """@brief Handle the data from a connected socket"""
-        
-        self._sendString( self._socket, "netplot_version={:.1f}\n".format(NetplotServer.NETPLOT_SVR_VERSION) )                    
+
+        self._sendString( self._socket, "netplot_version={:.1f}\n".format(NetplotServer.NETPLOT_SVR_VERSION) )
         try:
             while True:
                 rxData = self._receiveString(self._socket)
                 self._handleRXData(rxData)
-                self._sendString( self._socket, "OK\n")
+                if self.ackEnabled:
+                    self._sendString( self._socket, "OK\n")
         except IOError:
             pass
 
@@ -94,23 +97,33 @@ class ConnectionHandler(object):
         """@brief Handle RX data from the client.
            @param rxData The RX data from the client.
            @return None"""
-        #print("rxData=<"+rxData+">")  
+        #print("rxData=<"+rxData+">")
         #This should be the first command we receive on the first socket connection
         if self._plotGridID == 0 and rxData.startswith(ConnectionHandler.GRID_CMD):
             self._removeOutputFile()
             ConnectionHandler.OUTPUT_LINE_LIST = []
 
-        if rxData.startswith(ConnectionHandler.ADD_PLOT):
+        elif rxData.startswith(ConnectionHandler.ADD_PLOT):
             ConnectionHandler.OUTPUT_LINE_LIST.append("set plot_grid={:d}\n".format(self._plotGridID) )
-                        
+
+        elif rxData.startswith(ConnectionHandler.ENABLE_ACK):
+            elems = rxData.split()
+            if len(elems) > 1:
+                if elems[1] == '0' or elems[1] == 'false':
+                    self.ackEnabled=False
+                else:
+                    self.ackEnabled=True
+
+            ConnectionHandler.OUTPUT_LINE_LIST.append("set plot_grid={:d}\n".format(self._plotGridID) )
+
         ConnectionHandler.OUTPUT_LINE_LIST.append(rxData)
-            
+
         if self._fileSaveTimer:
             self._fileSaveTimer.cancel()
 
         self._fileSaveTimer = threading.Timer(0.2, self._saveOutputFile)
         self._fileSaveTimer.start()
-        
+
     def _getPlotPath(self):
         """@brief Get the plot path to save the plot into."""
         plotPath = ""
@@ -121,11 +134,11 @@ class ConnectionHandler(object):
                 elems = line.split("=")
                 if len(elems) > 1:
                     plotPath = elems[1];
-                    
+
         plotPath = plotPath.replace(" ","_")
         plotPath = plotPath.replace("/","_")
         return os.path.join( self._options.path, plotPath)
-        
+
     def _createPlotPath(self):
         """@brief Create the plot path to store the plot file.
            @return The plot path. This will be an empty string if no plot title has been set."""
@@ -135,7 +148,7 @@ class ConnectionHandler(object):
                 os.makedirs(plotPath)
         print("PJA: plotPath={}".format(plotPath))
         return plotPath
-                
+
     def _updateNetplotFile(self, plotPath):
         """@brief Update the netplot file.
            @param plotPath The path to save the file.
@@ -144,20 +157,20 @@ class ConnectionHandler(object):
         #!!! We must create this every time as it may be called several times before the plot is complete.
         destFile = os.path.join(plotPath, ConnectionHandler.OUTPUT_FILENAME)
         copyfile(netplotCmdsFile, destFile)
-            
+
     def _updateIndexHtmlFile(self, plotPath):
         """@brief Update the index.html file in the plot folder.
            @param plotPath The path for this plot (top level folder).
            @return None"""
         srcPath = os.path.join(self._options.path, ConnectionHandler.ASSETS_FOLDER)
         srcPath = os.path.join(srcPath, ConnectionHandler.HTML_FOLDER)
-        srcFile = os.path.join(srcPath, ConnectionHandler.INDEX_HTML_FILE)           
+        srcFile = os.path.join(srcPath, ConnectionHandler.INDEX_HTML_FILE)
         destPath = plotPath
-        destFile = os.path.join(destPath, ConnectionHandler.INDEX_HTML_FILE)                           
+        destFile = os.path.join(destPath, ConnectionHandler.INDEX_HTML_FILE)
         if not os.path.isdir(destPath):
             os.makedirs(destPath)
         copyfile(srcFile, destFile)
-        
+
     def _updateJavaScriptFile(self, plotPath, javaScriptFilename):
         """@brief Copy a javascript file to the assets folder for a plot.
            @param plotPath The path for this plot (top level folder).
@@ -165,14 +178,14 @@ class ConnectionHandler(object):
            @return None"""
         srcPath = os.path.join(self._options.path, ConnectionHandler.ASSETS_FOLDER)
         srcPath = os.path.join(srcPath, ConnectionHandler.JAVASCRIPT_FOLDER)
-        srcFile = os.path.join(srcPath, javaScriptFilename)           
+        srcFile = os.path.join(srcPath, javaScriptFilename)
         destPath = os.path.join(plotPath, ConnectionHandler.ASSETS_FOLDER)
         destPath = os.path.join(destPath, ConnectionHandler.JAVASCRIPT_FOLDER)
-        destFile = os.path.join(destPath, javaScriptFilename)                           
+        destFile = os.path.join(destPath, javaScriptFilename)
         if not os.path.isdir(destPath):
             os.makedirs(destPath)
         copyfile(srcFile, destFile)
-                
+
     def _getFileLines(self, theFile):
         """@brief Read lines of text from a file.
            @param theFile The file to read from.
@@ -183,7 +196,7 @@ class ConnectionHandler(object):
             lines = fd.readlines()
             fd.close()
         return lines
-                    
+
     def _writeFileLines(self, theFile, textLines):
         """@brief Write lines of test to a file.
            @param theFile The file to write to.
@@ -195,7 +208,7 @@ class ConnectionHandler(object):
             print("PJA: write <%s>" % (line) )
             fd.write(line+"\n");
         fd.close()
-                           
+
     def _updateplotFolderList(self):
         """@brief Update the list of folders that contain plots.
                   This file is read by plot_table_build.js to build the table of available plots.
@@ -214,10 +227,10 @@ class ConnectionHandler(object):
                         newLines.append(line)
                 newLines.append("{}\n".format(folderEntry))
                 self._writeFileLines(ConnectionHandler.PLOT_LIST_FILENAME, newLines)
-        
+
     def _saveOutputFile(self):
         """@brief Save all the commands received to the output file."""
-        
+
         #Save the output file.
         absFilename = os.path.join( self._options.path, ConnectionHandler.OUTPUT_FILENAME)
         fd = open(absFilename,"w")
@@ -225,27 +238,27 @@ class ConnectionHandler(object):
             fd.write(line)
         fd.close()
         self._uo.info("Saved {}".format(ConnectionHandler.OUTPUT_FILENAME))
-        
+
         plotPath = self._createPlotPath()
         self._updateNetplotFile(plotPath)
         self._updateIndexHtmlFile(plotPath)
         self._updateJavaScriptFile(plotPath, ConnectionHandler.NETPLOT_JS_FILE)
         self._updateJavaScriptFile(plotPath, ConnectionHandler.NETPLOT_LEGENDS_JS_FILE)
         self._updateplotFolderList()
-        
 
 
 
-        
+
+
     def _removeOutputFile(self):
         absPath = os.path.join(self._options.path, ConnectionHandler.OUTPUT_FILENAME)
         if os.path.isfile(absPath):
             os.remove(absPath)
             self._uo.info("Removed {}".format(ConnectionHandler.OUTPUT_FILENAME))
-        
+
 class NetplotServer(object):
     """@brief Responsibe for reciving data from netplot clients and saving it to local files"""
-    
+
     DEFAULT_BASE_PORT   = 9600
     DEFAULT_PORT_COUNT  = 100
     BUFFER_SIZE         = 65535
@@ -255,34 +268,34 @@ class NetplotServer(object):
     def __init__(self, uo, options):
         self._uo = uo
         self._options = options
-        
+
     def serve(self):
         """@brief Run the server on all ports.
            @return None"""
-           
+
         #Start the web server to display the plots
         wsThread = threading.Thread(target=self.startWebServer)
         wsThread.start()
-        
+
         for port in range(self._options.bp, self._options.bp+self._options.pc):
             _thread = threading.Thread(target=self._servePort, args=(port,))
             _thread.start()
-            
+
     def _servePort(self, port):
         """@brief Run the server on all ports.
            @param port The TCP port to accept connections on.
            @return None"""
 
-        tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-        tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
+        tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         tcpServer.bind((NetplotServer.SERVER_HOST_IP, port))
         self._uo.info("Serve on TCP/IP port {:d}".format(port))
-        while True: 
-            tcpServer.listen(1) 
+        while True:
+            tcpServer.listen(1)
             (_socket, (ip,remotePort)) = tcpServer.accept()
             self._uo.info("Client connected on port {:d}".format(port))
             self._handleConnection(_socket, port)
-            
+
     def _handleConnection(self, _socket, localPort):
         """@brief Handle a connected socket
            @param _socket The connected socket
@@ -296,19 +309,19 @@ class NetplotServer(object):
 
     def startWebServer(self):
         """@brief Start the web server."""
-        
+
         #Delay so that we see the output from the HTTP server after the 100 tcp ports are shown.
         sleep(1)
-        
+
         try:
             #Set to the web server root
             os.chdir(self._options.root)
             self._uo.info("Web Server Root: {}".format(self._options.root))
             cgitb.enable()
-            
+
             Handler = ServerHandler
             port    = self._options.port
-            
+
             Handler.cgi_directories = [self._options.cgi]
 
             self._uo.info("serving at port {:d}".format(self._options.port) )
@@ -318,7 +331,7 @@ class NetplotServer(object):
             server = http.server.HTTPServer(("", options.port), Handler)
 
             server.serve_forever()
-            
+
         #If the user presses CTRL C
         except KeyboardInterrupt:
     	    self.shutdown(server)
@@ -326,20 +339,20 @@ class NetplotServer(object):
         #If the program throws a system exit exception
         except SystemExit:
     	    self.shutdown(server)
-          
+
         except:
              raise
-        
+
     def shutdown(self, server):
         """Shutdown the web server"""
         if server != None:
             server.socket.close()
             self._uo.info("Shutdown server on port {:d}".format(self._options.port) )
-        
+
 class ServerHandler(http.server.CGIHTTPRequestHandler):
 
     QUERY_STRING = "QUERY_STRING"
-    
+
     def do_GET(self):
         logging.warning("======= GET STARTED =======")
         logging.warning(self.headers)
@@ -375,10 +388,10 @@ if __name__== '__main__':
 
     try:
         (options, args) = opts.parse_args()
-            
+
         netplotServer = NetplotServer(uo, options)
         netplotServer.serve()
-        
+
     #If the program throws a system exit exception
     except SystemExit:
       pass
@@ -388,6 +401,6 @@ if __name__== '__main__':
     except:
      if options.debug:
        raise
-       
+
      else:
        uo.error(sys.exc_value)
