@@ -71,7 +71,9 @@ class NetPlot:
                                 #to the server to add these plot points.
     self.__plotValueCache=[]
     self.sock = None
-
+    self._ackEnabled = True     #If enabled, for each command sent to the server
+                                #an OK acknowledgment will be returned
+                                #to the client.
   @staticmethod
   def GetTimeNowString():
       """@brief This is a helper method which users can call to obtain a timestamp string that
@@ -133,7 +135,7 @@ class NetPlot:
     cmdL = "{}\n".format(cmd)
     self.sock.send( cmdL.encode('utf-8') ) #Convert string to bytes like object (Python 2->3)
     #Wait for response
-    while 1:
+    while self._ackEnabled:
 	    try:
 	    	rxData = self.sock.recv(256)
 	    	rxData = rxData.decode("utf-8") #Convert bytes like object to string (Python 2->3)
@@ -343,6 +345,22 @@ class NetPlot:
     """Enable/Disable the plot cache"""
     self.__cacheEnabled=enabled
 
+  def enableAck(self, enabled):
+      """@brief Enable/Disable command acknowledgement.
+         @details If enabled each command is responded to with an OK or ERROR token.
+                  Due to round trip delay of the TCP socket this can slow down
+                  a plot over a network. In such a case the acknowledgemnents
+                  can be disabled.
+         @param enabled If True and acknowledgement (OK or ERROR) is returned
+                        to the client.
+         @return None"""
+      #Let the server know about the ack status
+      if enabled:
+            self.sendCmd("enable_ack 1")
+      else:
+            self.sendCmd("enable_ack 0")
+      self._ackEnabled = enabled
+
   def update(self):
     """Send all plotValueCache plot points.
        Only call this when__cacheEnabled is True"""
@@ -363,7 +381,7 @@ class NetPlot:
     self.sock.send('%s\n' % (cmd) )
     #Wait for responses
     rxCmdCount=0
-    while rxCmdCount < cmdCount:
+    while self._ackEnabled and rxCmdCount < cmdCount:
       try:
         rxData = self.sock.recv(65536)
         rxCmdCount = rxCmdCount + self.__processResponse(rxData)
