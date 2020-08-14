@@ -378,7 +378,8 @@ class NetPlot:
     self.__plotValueCache = []
 
     self.__debugPrint('CMD: %s' % (cmd) )
-    self.sock.send('%s\n' % (cmd) )
+    txString = '{}\n'.format(cmd)
+    self.sock.send(txString.encode('utf-8'))
     #Wait for responses
     rxCmdCount=0
     while self._ackEnabled and rxCmdCount < cmdCount:
@@ -399,6 +400,8 @@ class NetPlot:
     if len(rxData) == 0:
       raise NetPlotError("No rxData received from netplot server")
 
+    rxData = rxData.decode("utf-8")
+    
     offset=0
     #Process all responses received in the rxData
     while offset < len(rxData):
