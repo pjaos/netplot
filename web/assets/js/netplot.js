@@ -327,6 +327,7 @@ class Netplot {
             plotLayout[xAxisPrefix]['title']=plotPlotConfig.plotXAxisName+", "+plotPlotConfig.plotTitle; 
             if( this.graphType == TIME_GRAPH_TYPE ) {
                 plotLayout[xAxisPrefix]['type']="scatter";
+                plotLayout[xAxisPrefix]['nticks']=3;
             }
             else {
                 plotLayout[xAxisPrefix]['type']="linear";
@@ -359,14 +360,12 @@ class Netplot {
                 y: [],    
         };
 
-        if( plotPlotConfig.lineWidth == '1' ) {
-            this.trace['line']= {width: 0.5};
+        //If line width == 100 then set dash trace
+        if( plotPlotConfig.lineWidth == 100 ) {
+            this.trace['line']= { dash: 'dash', width: 2 };
         }
         else {
-            this.trace['line']= {
-                    dash: 'dash',
-                    width: 2
-            };
+            this.trace['line']= {width:  plotPlotConfig.lineWidth};
         }
 
         if( plotPlotConfig.plotGridIndex >= 1 ) {

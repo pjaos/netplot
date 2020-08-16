@@ -43,7 +43,7 @@ class PlotConfig:
     self.xAxisName=""
     self.yAxisName=""
     self.enableLines=1
-    self.lineWidth=1
+    self.lineWidth=1        #On web interface if line width == 100 then a dashed line is plotted.
     self.enableShapes=1
     self.enableAutoScale=1
     self.minScaleValue=0
