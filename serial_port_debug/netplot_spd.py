@@ -375,7 +375,9 @@ class WorkingSerialDebugger(object):
                                         self._uo.info('Value: {}'.format(str(value)))
 
                         line = ''
-
+                else:
+                    #If no data is received, don't spin lock
+                    sleep(0.05)
         finally:
 
             if self._serial:
