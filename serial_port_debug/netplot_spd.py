@@ -5,7 +5,7 @@ from    optparse import OptionParser
 from    spd_libs.netplot_client import PlotConfig, NetPlot, DEFAULT_NETPLOT_PORT
 import  serial
 
-VERSION = 2.0
+VERSION = 2.2
 
 class SerialDebuggerError(Exception):
     pass
