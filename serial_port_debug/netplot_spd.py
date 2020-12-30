@@ -209,10 +209,8 @@ class SerialDebugger(object):
         self._uo.debug("_extractNumber({})".format(text))
         while index < len(text):
             currentChar = text[index].upper()
-            if currentChar in SerialDebugger.WHITESPACE_CHARS:
-                pass #Ignore this character
 
-            elif currentChar in SerialDebugger.DECIMAL_DIGIT_LIST:
+            if currentChar in SerialDebugger.DECIMAL_DIGIT_LIST:
                 extractedCharList.append(currentChar)
 
             elif currentChar in SerialDebugger.HEXADECIMAL_DIGIT_LIST:
@@ -225,7 +223,7 @@ class SerialDebugger(object):
 
             else:
                 self._uo.debug("Invalid number character found: <{}>".format( ord(currentChar) ))
-                pass
+                break
 
             index = index + 1
 
