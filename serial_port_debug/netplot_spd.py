@@ -12,12 +12,16 @@ class SerialDebuggerError(Exception):
 
 class UO(object):
     """@brief responsible for user viewable output"""
-
+    
+    def __init__(self, debug=False):
+        self._debug = debug
+    
     def info(self, text):
         print( 'INFO:  ' + str(text) )
 
     def debug(self, text):
-        print( 'DEBUG: ' + str(text) )
+        if self._debug:
+            print( 'DEBUG: ' + str(text) )
         
     def warn(self, text):
         print( 'WARN:  ' + str(text) )
@@ -84,6 +88,7 @@ class SerialDebugger(object):
 
     DECIMAL_DIGIT_LIST = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     HEXADECIMAL_DIGIT_LIST = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
+    WHITESPACE_CHARS = ( " ", "\t" )
 
     def __init__(self, uo, options):
         self._uo = uo
@@ -161,6 +166,8 @@ class SerialDebugger(object):
     def _processLine(self, line):
         """@brief Process a text received on the serial port
            @param line The line of text received from the serial port."""
+        debugLine = line.rstrip("\n")
+        self._uo.debug(debugLine)
 
         valueTextList = []
         lineElements = line.split(',')
@@ -189,15 +196,23 @@ class SerialDebugger(object):
         index = 0
         hexadecimalNumber = False
         floatFound = False
-
+        
         if text.upper().startswith("0X"):
             text = text[2:]
             hexadecimalNumber = True
 
+        #The bash shell may add a space char
+        if text.upper().startswith(" 0X"):
+            text = text[3:]
+            hexadecimalNumber = True
+
+        self._uo.debug("_extractNumber({})".format(text))
         while index < len(text):
             currentChar = text[index].upper()
+            if currentChar in SerialDebugger.WHITESPACE_CHARS:
+                pass #Ignore this character
 
-            if currentChar in SerialDebugger.DECIMAL_DIGIT_LIST:
+            elif currentChar in SerialDebugger.DECIMAL_DIGIT_LIST:
                 extractedCharList.append(currentChar)
 
             elif currentChar in SerialDebugger.HEXADECIMAL_DIGIT_LIST:
@@ -209,8 +224,8 @@ class SerialDebugger(object):
                 floatFound = True
 
             else:
-                # If we find a number number character quit looking
-                break
+                self._uo.debug("Invalid number character found: <{}>".format( ord(currentChar) ))
+                pass
 
             index = index + 1
 
@@ -390,9 +405,9 @@ if __name__ == '__main__':
                     help="Plot all values on the same graph. By default each value is plotted on separate graphs.",
                     action="store_true", default=False)
 
-
     try:
         (options, args) = opts.parse_args()
+        uo = UO(debug=options.debug)
 
         serialDebugger = SerialDebugger(uo, options)
         serialDebugger.run()
