@@ -1,0 +1,9 @@
+Package: python-netplot-spd
+Section: Development
+Priority: optional
+Architecture: all
+Essential: no
+Installed-Size: 2
+Maintainer: Paul Austen <pausten.os@gmail.com>
+Description: Plot data from the serial port using netplot.
+Version: 2.0

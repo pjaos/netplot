@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "The netplot_spd command has been removed."
