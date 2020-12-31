@@ -2,8 +2,11 @@
 
 import  sys
 from    optparse import OptionParser
-from    spd_libs.netplot_client import PlotConfig, NetPlot, DEFAULT_NETPLOT_PORT
+from    time import sleep
+
 import  serial
+
+from    spd_libs.netplot_client import PlotConfig, NetPlot, DEFAULT_NETPLOT_PORT
 
 VERSION = 2.2
 
@@ -270,114 +273,10 @@ class SerialDebugger(object):
                     if pos >= 0:
                         self._processLine(line)
                         line = ''
-
-        finally:
-
-            if self._serial:
-                self._serial.close()
-
-            if self._netPlot:
-                self._netPlot.disconnect()
-
-
-class WorkingSerialDebugger(object):
-    """@brief Provide serial deug capabilities using netplot"""
-
-    def __init__(self, uo, options):
-        self._uo = uo
-        self._options = options
-
-        self._init()
-
-        self._serial = None
-        self._captureTextList = None
-        self._netPlot = None
-        self._plotCount = 0
-
-        self._init()
-
-    def _init(self):
-        """@brief Init the serial debugger object"""
-
-        self._netPlot = None
-
-        if not self._options.text:
-            raise SerialDebuggerError("Please enter serial debug text to capture number from")
-
-        self._captureTextList = self._options.text.split(",")
-
-    def _openSerialPort(self):
-        """@brief Open the serial port with the required parameters"""
-        self._serial = serial.Serial(
-            port=self._options.port,
-            baudrate=self._options.baud,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            bytesize=serial.EIGHTBITS
-        )
-
-    def _netplotConnect(self):
-        """@brief Connect to the netplot server"""
-        self._netPlot = NetPlot()
-        self._netPlot.connect(self._options.np, DEFAULT_NETPLOT_PORT)
-        self._netPlot.setPlotType('time', title="Serial Debug Values")
-
-    def run(self):
-        """@brief Run the debugger and plot the values captured"""
-        try:
-
-            self._netplotConnect()
-
-            self._openSerialPort()
-
-            plotDict = {}
-            line = ''
-            while True:
-                if self._serial.inWaiting() > 0:
-                    line += self._serial.read(1)
-                    pos = line.find("\n")
-                    if pos > 0:
-                        for captureText in self._captureTextList:
-                            pos = line.find(captureText)
-                            if pos >= 0:
-                                valueText = line[pos + len(captureText):]
-                                valueText = valueText.rstrip("\r")
-                                valueText = valueText.rstrip("\n")
-                                elems = valueText.split()
-                                if len(elems) > 0:
-                                    value = None
-                                    try:
-                                        value = int(elems[0])
-                                    except ValueError:
-                                        try:
-                                            value = int(elems[0], 16)
-                                        except ValueError:
-                                            pass
-
-                                    if value:
-                                        if not plotDict.has_key(captureText):
-                                            plotConfig = PlotConfig()
-                                            plotConfig.plotName = captureText
-                                            plotConfig.xAxisName = "The X axis"
-                                            plotConfig.yAxisName = "Time"
-                                            plotConfig.enableLines = 1
-                                            plotConfig.enableShapes = 1
-                                            plotConfig.enableAutoScale = 1
-                                            plotConfig.plotIndex = self._plotCount
-
-                                            self._plotCount = self._plotCount + 1
-
-                                            self._netPlot.addPlot(plotConfig)
-                                            self._uo.info('Added plot: {}'.format(plotConfig.plotName))
-                                            plotDict[captureText] = plotConfig
-
-                                        self._netPlot.addPlotValues([value])
-                                        self._uo.info('Value: {}'.format(str(value)))
-
-                        line = ''
                 else:
                     #If no data is received, don't spin lock
                     sleep(0.05)
+
         finally:
 
             if self._serial:
@@ -386,8 +285,6 @@ class WorkingSerialDebugger(object):
             if self._netPlot:
                 self._netPlot.disconnect()
 
-
-# Very simple cmd line template using optparse
 if __name__ == '__main__':
     uo = UO()
 
